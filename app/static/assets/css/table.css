@@ -1,0 +1,31 @@
+.trtable-item {
+    transition: all 0.5s;
+  }
+  .trtable-item > * {
+    transition: all 0.5s;
+    overflow: hidden;
+  }
+  .trtable-enter {
+    opacity: 0;
+  }
+  .trtable-enter-active {
+    opacity: 0;
+  }
+  .trtable-enter-to {
+    opacity: 0;
+    background-color: green;
+  }
+  .trtable-enter > * {
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+  }
+
+  .balance-enter-active  {
+    transition: all 1s;
+    color: green;
+  }
+
+  .balance-enter  {
+    opacity: 0;
+    color: green;
+  }
