@@ -82,7 +82,7 @@ app.use(serveStatic('static', { index: ['auth-login.html'] }))
 
 /* bring in some routers */
 app.use('/account', accountRouter)
-app.use('/transaction', purchaseRouter)
+app.use('/purchase', purchaseRouter)
 
 /* websocket poll response */
 app.get('/api/config/ws', (req, res) => {

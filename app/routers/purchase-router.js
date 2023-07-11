@@ -47,25 +47,26 @@ purchaseRouter.get('/biggestspenders', async (req, res) => {
 
 purchaseRouter.get('/search', async (req, res) => {
   const term = req.query.term
-
+  console.log(term)
   let results
 
   if(term.length>=3){
-    results = await bankRepo.search()
-      .where('description').matches(term)
-      .or('fromAccountName').matches(term)
-      .or('transactionType').equals(term)
+    results = await purchaseRepository.search()
+      .where('artist_name').matches(term)
+      .or('album_title').matches(term)
+      // .or('transactionType').equals(term)
       .return.all({ pageSize: 1000})
   }
+  console.log('results: ', results)
   res.send(results)
 })
 
 /* return ten most recent transactions */
-purchaseRouter.get('/transactions', async (req, res) => {
-  console.log('transaction/transactions called')
-  const transactions = await purchaseRepository.search()
+purchaseRouter.get('/purchases', async (req, res) => {
+  console.log('purchase/purchases called')
+  const purchases = await purchaseRepository.search()
     .sortBy('utc_date', 'DESC')
     .return.all({ pageSize: 10})
-  console.log(transactions.slice(0, 10))
-  res.send(transactions.slice(0, 10))
+  console.log(purchases.slice(0, 10))
+  res.send(purchases.slice(0, 10))
 })
