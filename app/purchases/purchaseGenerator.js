@@ -24,8 +24,9 @@ export const addPurchasesToStream = async () => {
   console.log(`Number of purchases pulled from Bandcamp: ${purchases.purchases.length}`)
   // adds purchases to stream
   purchases.purchases.forEach(purchase => {
+    purchase.utc_date_raw = purchase.utc_date;
     const preparedPurchase = JSON.parse(JSON.stringify(purchase.items[0], replacer))
-    redis.XADD( PURCHASE_STREAM, '*', preparedPurchase, { TRIM })
+    redis.XADD( PURCHASE_STREAM, '*', preparedPurchase, { TRIM });
   })
   // adds most recent number of purchases into ts
   await redis.ts.add(SALES_TS, "*", purchases.purchases.length, {DUPLICATE_POLICY: "FIRST"})
@@ -54,6 +55,7 @@ export const createAlbumPurchase = async (purchase) => {
   /* Grab an artist from the stream. keep track of the entity id */
   console.log('createAlbumPurchase called')
   
+  purchase.utc_date_raw = parseFloat(purchase.utc_date)
   purchase.utc_date = Math.floor(purchase.utc_date)
   purchase.amount_paid = parseInt(purchase.amount_paid)
   purchase.item_price = parseInt(purchase.item_price)

@@ -82,7 +82,7 @@ var transactionsOverview = new Vue({
   },
   methods: {
     getInitialData: function () {
-      var transactionsUrl = 'transaction/transactions'
+      var transactionsUrl = 'purchase/purchases'
       var vm = this
       axios.get(transactionsUrl)
         .then(function (response) {
@@ -94,7 +94,7 @@ var transactionsOverview = new Vue({
           console.log('Error! Could not reach the API. ' + error)
         })
 
-        axios.get("/transaction/balance")
+        axios.get("/purchase/balance")
         .then(function (response) {
           vm.areaChart.updateSeries([{
             name: 'value',
@@ -105,7 +105,7 @@ var transactionsOverview = new Vue({
           console.log('Error! Could not reach the API. ' + error)
         })
 
-      axios.get("/transaction/biggestspenders")
+      axios.get("/purchase/biggestspenders")
         .then(function (response) {
 
           vm.pieOptions.series = response.data.series
@@ -143,7 +143,7 @@ var transactionsOverview = new Vue({
               vm.account = transactionObject.toAccount
               vm.balance = parseInt(transactionObject.balance)
 
-              axios.get("/transaction/balance")
+              axios.get("/purchase/balance")
                   .then(function (response) {
                     vm.areaChart.updateSeries([{
                       name: 'value',
@@ -153,7 +153,7 @@ var transactionsOverview = new Vue({
                   .catch(function (error) {
                     console.log('Error! Could not reach the API. ' + error)
                   })
-              axios.get("/transaction/biggestspenders")
+              axios.get("/purchase/biggestspenders")
                   .then(function (response) {
                 
                     vm.pieOptions.series = response.data.series
@@ -179,11 +179,12 @@ var transactionsOverview = new Vue({
         searchTerm = searchTerm.trim() + '*'
       }
 
-      var searchUrl = '/transaction/search?term=' + searchTerm
+      var searchUrl = '/purchase/search?term=' + searchTerm
       var vm = this
       axios.get(searchUrl)
         .then(function (response) {
           vm.searchitems = response.data
+          console.log(vm.searchitems)
         })
         .catch(function (error) {
           console.log('Error! Could not reach the API. ' + error)

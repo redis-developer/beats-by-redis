@@ -142,7 +142,8 @@
                                     </thead>
                                     <tbody name="searchtable" is="transition-group">
                                         <tr class="searchtable-item" v-for="searchitem in searchitems"
-                                            :key="searchitem.id">
+                                            :key="searchitem.utc_date_raw">
+                                            <td><a :href="searchitem.url" target="new"><img class="thumbnail" :src="searchitem.art_url" /></a></td>
                                             <td>{{ searchitem.artist_name }}</td>
                                             <td><span v-html="searchitem.artist_name"></span></td>
                                             <td>{{ searchitem.item_description }}</td>
@@ -178,7 +179,7 @@
                                     </tr>
                                 </thead>
                                 <tbody name="trtable" is="transition-group">
-                                    <tr class="trtable-item" v-for="item in items" v-bind:key="item.artist_name+item.package_image_id">
+                                    <tr class="trtable-item" v-for="item in items" v-bind:key="item.utc_date_raw">
                                         <td><a :href="item.url" target="new"><img class="thumbnail" :src="item.art_url" /></a></td>
                                         <td>{{ item.artist_name }}</td>
                                         <td>{{ item.item_description }}</td>
@@ -215,7 +216,7 @@
     <script src="assets/js/axios.min.js"></script>
     <script src="assets/js/lodash.min.js"></script>
     <script src="assets/js/webstomp-client.min.js"></script>
-    <script src="assets/js/transactions.js"></script>
+    <script src="assets/js/purchases.js"></script>
 </body>
 
 </html>
