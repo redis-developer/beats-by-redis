@@ -55,6 +55,5 @@ export const createBankTransaction = async () => {
   
   const purchaseTransaction = await purchaseTransactionRepository.save(transaction)
   streampurchaseTransaction(purchaseTransaction)
-  console.log('Created purchaseTransaction!')
   return purchaseTransaction
 }

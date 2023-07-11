@@ -86,7 +86,6 @@ var transactionsOverview = new Vue({
       var vm = this
       axios.get(transactionsUrl)
         .then(function (response) {
-          console.log(response.data)
           vm.items = response.data
           vm.balance = response.data[0].balance
         })
@@ -139,7 +138,6 @@ var transactionsOverview = new Vue({
               if(vm.items.length > 10){
                 vm.items.pop()
               }
-              console.log(transactionObject)
               vm.account = transactionObject.toAccount
               vm.balance = parseInt(transactionObject.balance)
 
@@ -184,7 +182,6 @@ var transactionsOverview = new Vue({
       axios.get(searchUrl)
         .then(function (response) {
           vm.searchitems = response.data
-          console.log(vm.searchitems)
         })
         .catch(function (error) {
           console.log('Error! Could not reach the API. ' + error)
