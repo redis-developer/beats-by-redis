@@ -43,12 +43,14 @@ purchaseRouter.get('/search', async (req, res) => {
   const term = req.query.term;
   let results;
 
-  if (term.length >= 3) {
+  if (term.length > 3) {
     results = await purchaseRepository
       .search()
       .where('artist_name')
       .matches(term)
       .or('album_title')
+      .matches(term)
+      .or('item_description')
       .matches(term)
       // .or('transactionType').equals(term)
       .return.all({ pageSize: 1000 });
