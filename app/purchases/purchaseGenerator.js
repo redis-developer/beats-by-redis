@@ -1,6 +1,4 @@
 import { redis } from '../om/client.js';
-import { purchaseRepository } from '../om/purchase-repository.js';
-
 import { replacer, getPurchases } from './utilities.js';
 
 const PURCHASE_BALANCE = 'purchase_balance';
@@ -49,18 +47,18 @@ const createPurchaseAmount = async (artist_name, amount_paid_usd) => {
 
 export const createAlbumPurchase = async (purchase) => {
   /* Grab an artist from the stream. keep track of the entity id */
-  purchase.artist_name = purchase.artist_name.replaceAll(':',';')
+  purchase.artist_name = purchase.artist_name.replaceAll(':', ';');
   purchase.utc_date_raw = parseFloat(purchase.utc_date);
   purchase.utc_date = Math.floor(purchase.utc_date);
   purchase.amount_paid = parseInt(purchase.amount_paid);
   purchase.item_price = parseInt(purchase.item_price);
   purchase.amount_paid_usd = parseInt(purchase.amount_paid_usd);
-  if(purchase.album_title == "null") {
+  if (purchase.album_title == 'null') {
     purchase.album_title = purchase.item_description;
   }
 
   // TODO JSON.set each purchase as purchase:artist_name:utc_date to prevent duplicates
-  const artistKey = `purchase:${purchase.artist_name}.${purchase.utc_date_raw}`
+  const artistKey = `purchase:${purchase.artist_name}.${purchase.utc_date_raw}`;
   const purchaseJSON = redis.json.set(artistKey, '$', purchase);
 
   createPurchaseAmount(purchase.artist_name, purchase.amount_paid_usd);

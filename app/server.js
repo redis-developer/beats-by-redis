@@ -16,6 +16,7 @@ import { redis, redis2 } from './om/client.js';
 import { accountRouter } from './routers/account-router.js';
 import { purchaseRouter } from './routers/purchase-router.js';
 import { WebSocketServer } from 'ws';
+import { authRouter } from './routers/auth-router.js';
 
 const TWO_MIN = 1000 * 60 * 2;
 const PURCHASE_BALANCE = 'purchase_balance';
@@ -84,6 +85,7 @@ cron.schedule('*/10 * * * * *', async () => {
 app.use(serveStatic('static', { index: ['auth-login.html'] }));
 
 /* bring in some routers */
+app.use('/auth', authRouter);
 app.use('/account', accountRouter);
 app.use('/purchase', purchaseRouter);
 
@@ -100,7 +102,7 @@ app.get('/api/config/ws', (req, res) => {
 // prime the stream "pump"
 app.get('/bc', async (req, res) => {
   const result = addPurchasesToStream();
-  res.send(result)
+  res.send(result);
 });
 
 app.post('/perform_login', (req, res) => {
