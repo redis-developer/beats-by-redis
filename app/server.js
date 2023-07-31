@@ -17,6 +17,7 @@ import { accountRouter } from './routers/account-router.js';
 import { purchaseRouter } from './routers/purchase-router.js';
 import { WebSocketServer } from 'ws';
 import { purchaseRepository } from './om/purchase-repository.js';
+import { authRouter } from './routers/auth-router.js';
 
 const TWO_MIN = 1000 * 60 * 2;
 const PURCHASE_BALANCE = 'purchase_balance';
@@ -85,6 +86,7 @@ cron.schedule('*/5 * * * * *', async () => {
 app.use(serveStatic('static', { index: ['auth-login.html'] }));
 
 /* bring in some routers */
+app.use('/auth', authRouter);
 app.use('/account', accountRouter);
 app.use('/purchase', purchaseRouter);
 
