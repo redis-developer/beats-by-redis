@@ -109,3 +109,4 @@ dist
 
 # Redis AOF
 redisdata/
+data/dump.rdb
