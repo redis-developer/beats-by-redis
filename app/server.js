@@ -16,6 +16,7 @@ import { redis, redis2 } from './om/client.js';
 import { accountRouter } from './routers/account-router.js';
 import { purchaseRouter } from './routers/purchase-router.js';
 import { WebSocketServer } from 'ws';
+import { purchaseRepository } from './om/purchase-repository.js';
 import { authRouter } from './routers/auth-router.js';
 
 const TWO_MIN = 1000 * 60 * 2;
@@ -61,7 +62,7 @@ cron.schedule('*/60 * * * * *', async () => {
 });
 
 // read from the stream create a JSON object then send to UI
-cron.schedule('*/10 * * * * *', async () => {
+cron.schedule('*/5 * * * * *', async () => {
   const result = await redis2.xRead(
     { key: streamKey, id: currentId },
     { COUNT: 1, BLOCK: TWO_MIN },
@@ -114,6 +115,14 @@ app.post('/perform_login', (req, res) => {
   } else {
     res.redirect('/auth-login.html');
   }
+});
+
+app.get('/reset', (_req, res) => {
+  redis.flushDb();
+  redis.set('purchase_balance', 0);
+  redis.ts.create('sales_ts', { DUPLICATE_POLICY: 'FIRST' });
+  res.json({ message: 'Database reset successfully' });
+  purchaseRepository.createIndex();
 });
 
 /* start the server */

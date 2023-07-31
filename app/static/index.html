@@ -151,7 +151,7 @@
                                             <!-- <td><span v-html="searchitem.album_title"></span></td> -->
                                             <td>{{ searchitem.item_description }}</td>
                                             <!-- <td><span v-html="searchitem.item_description"></span></td> -->
-                                            <td>{{'$' + searchitem.amount_paid}}</td>
+                                            <td>{{'$' + searchitem.amount_paid_usd}}</td>
                                             <!-- <td><span v-html="searchitem.amount_paid"></span></td> -->
                                         </tr>
                                     </tbody>
@@ -188,7 +188,7 @@
                                         <td>{{ item.artist_name }}</td>
                                         <td>{{ item.album_title }}</td>
                                         <td>{{ item.item_description }}</td>
-                                        <td>{{ '$' + item.amount_paid }}</td>
+                                        <td>{{ '$' + item.amount_paid_usd }}</td>
                                     </tr>
                                 </tbody>
                             </table>

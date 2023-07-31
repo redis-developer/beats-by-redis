@@ -57,12 +57,9 @@ export const createAlbumPurchase = async (purchase) => {
     purchase.album_title = purchase.item_description;
   }
 
-  // TODO JSON.set each purchase as purchase:artist_name:utc_date to prevent duplicates
   const artistKey = `purchase:${purchase.artist_name}.${purchase.utc_date_raw}`;
   const purchaseJSON = redis.json.set(artistKey, '$', purchase);
 
   createPurchaseAmount(purchase.artist_name, purchase.amount_paid_usd);
-  // const purchaseTransaction = await purchaseRepository.save(purchase);
-  //streamBankTransaction(bankTransaction)
   return purchaseJSON;
 };
