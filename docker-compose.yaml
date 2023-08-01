@@ -9,12 +9,14 @@ services:
     restart: always
 
   app:
-      build: ./app
-      volumes:
-        - ./app:/usr/src/app
-      ports:
-        - '8080:8080'
-        - '80:80'
-      restart: always
-      depends_on:
-        - redis
+    build: ./app
+    volumes:
+      - ./app:/usr/src/app
+    ports:
+      - '8080:8080'
+      - '80:80'
+    env_file:
+      - .env
+    restart: always
+    depends_on:
+      - redis

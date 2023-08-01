@@ -72,6 +72,7 @@ async function refresh(accessToken, refreshToken) {
   const [, embeddedAccessToken, expiresOn] = decoded.split('_');
 
   if (
+    !expiresOn ||
     moment(expiresOn).isBefore(moment()) ||
     embeddedAccessToken !== accessToken
   ) {
@@ -181,7 +182,10 @@ async function getUserWithToken({ token, refresh: refreshToken }) {
 
   const [, authEntityId, tokenExpiresOn] = accessToken.split('_');
 
-  if (moment(tokenExpiresOn).isBefore(moment()) && refreshToken) {
+  if (
+    (!tokenExpiresOn || moment(tokenExpiresOn).isBefore(moment())) &&
+    refreshToken
+  ) {
     const result = await refresh(token, refreshToken);
 
     return getUserWithToken(result);
