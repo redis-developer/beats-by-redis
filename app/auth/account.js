@@ -18,7 +18,7 @@ const REFRESH_PREFIX = 'refresh';
  * @returns {Promise<{tokenExpiresOn: Date, refreshExpiresOn: Date, token: string, refresh: string}>}
  */
 async function createAccessToken(userId) {
-  const tokenExpiresOn = moment.utc().add(1, 'hour').toDate();
+  const tokenExpiresOn = moment.utc().add(1, 'second').toDate();
   const refreshExpiresOn = moment.utc().add(120, 'days').toDate();
 
   const auth = await authRepository.save({
@@ -26,6 +26,9 @@ async function createAccessToken(userId) {
     refreshExpiresOn,
     userId,
   });
+
+  const duration = moment.duration(moment(refreshExpiresOn).diff(moment()));
+  await authRepository.expire(auth[EntityId], Math.round(duration.asSeconds()));
 
   const token = await encode(
     `${ACCESS_PREFIX}_${auth[EntityId]}_${tokenExpiresOn}`,
@@ -56,7 +59,6 @@ async function createAccessToken(userId) {
  * @returns {Promise<{tokenExpiresOn: Date, refreshExpiresOn: Date, token: string, refresh: string}>}
  */
 async function refresh(accessToken, refreshToken) {
-  console.log(`Refreshing: ${accessToken} ${refreshToken}`);
   if (typeof refreshToken !== 'string') {
     throw new Error('Expired');
   }
