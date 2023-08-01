@@ -60,7 +60,7 @@ async function refresh(refreshToken) {
   const entityId = decoded.replace(`${REFRESH_PREFIX}_`, '');
   const session = await sessionRepository.fetch(entityId);
 
-  if (!session) {
+  if (!session || session.refreshexpireson < moment.utc().toDate()) {
     throw new Error('Expired');
   }
 
@@ -146,4 +146,30 @@ async function register(username, password) {
   return createAccessToken(user[EntityId]);
 }
 
-export { login, register, createAccessToken, refresh };
+async function getUserWithToken({ token, refresh: refreshToken }) {
+    if (!token) {
+        return;
+    }
+
+    const accessToken = await decode(token);
+    const sessionId = accessToken.replace(`${ACCESS_PREFIX}_`, '');
+    const session = await sessionRepository.fetch(sessionId);
+
+    if (!session) {
+        return;
+    }
+
+    const { userId, tokenexpireson } = session;
+
+    if (tokenexpireson < moment.utc().toDate() && refreshToken) {
+        const result = await refresh(refreshToken);
+
+        return getUserWithToken(result);
+    }
+
+    const user = await userRepository.fetch(userId);
+
+    return user;
+}
+
+export { login, register, createAccessToken, refresh, getUserWithToken };

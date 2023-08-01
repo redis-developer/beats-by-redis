@@ -10,7 +10,10 @@ authRouter.post('/login', async (req, res) => {
     const session = await login(username, password);
     Object.assign(req.session, session);
 
-    res.redirect('/index.html');
+    req.session.save(() => {
+        res.redirect('/');
+    });
+
   } catch (err) {
     res.status(401).send(err.message);
   }
@@ -23,7 +26,9 @@ authRouter.post('/register', async (req, res) => {
     const session = await register(username, password);
     Object.assign(req.session, session);
 
-    res.redirect('/index.html');
+    req.session.save(() => {
+        res.redirect('/');
+    });
   } catch (err) {
     res.status(401).send(err.message);
   }

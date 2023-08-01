@@ -2,7 +2,6 @@ import 'dotenv/config.js';
 import * as cron from 'node-cron';
 
 import express from 'express';
-import serveStatic from 'serve-static';
 import bodyParser from 'body-parser';
 
 import session from 'express-session';
@@ -18,6 +17,7 @@ import { purchaseRouter } from './routers/purchase-router.js';
 import { WebSocketServer } from 'ws';
 import { purchaseRepository } from './om/purchase-repository.js';
 import { authRouter } from './routers/auth-router.js';
+import { getUserWithToken } from './auth/account.js';
 
 const TWO_MIN = 1000 * 60 * 2;
 const PURCHASE_BALANCE = 'purchase_balance';
@@ -33,14 +33,6 @@ const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(
-  session({
-    store: store,
-    resave: false,
-    saveUninitialized: false,
-    secret: '5UP3r 53Cr37',
-  }),
-);
 
 // set up a basic web sockect server and a set to hold all the sockets
 const wss = new WebSocketServer({ port: 80 });
@@ -83,7 +75,40 @@ cron.schedule('*/5 * * * * *', async () => {
   currentId = id;
 });
 
-app.use(serveStatic('static', { index: ['auth-login.html'] }));
+app.use('/auth-login', express.static('static', { index: 'auth-login.html' }));
+app.use(
+  '/auth-register',
+  express.static('static', { index: 'auth-register.html' }),
+);
+
+app.use(
+  session({
+    store: store,
+    resave: false,
+    saveUninitialized: false,
+    secret: '5UP3r 53Cr37',
+  }),
+);
+
+async function requireUser(req, res, next) {
+    if (req.user) {
+        next();
+        return;
+    }
+
+    const user = await getUserWithToken(req.session);
+
+    if (!user) {
+      next();
+      return;
+    }
+
+    req.user = {
+      username: user.username,
+    };
+
+    next();
+}
 
 /* bring in some routers */
 app.use('/auth', authRouter);
@@ -106,17 +131,6 @@ app.get('/bc', async (req, res) => {
   res.send(result);
 });
 
-app.post('/perform_login', (req, res) => {
-  let session = req.session;
-  if (req.body.username == 'bob' && req.body.password == 'foobared') {
-    session = req.session;
-    session.userid = req.body.username;
-    res.redirect('/index.html');
-  } else {
-    res.redirect('/auth-login.html');
-  }
-});
-
 app.get('/reset', (_req, res) => {
   redis.flushDb();
   redis.set('purchase_balance', 0);
@@ -124,6 +138,26 @@ app.get('/reset', (_req, res) => {
   res.json({ message: 'Database reset successfully' });
   purchaseRepository.createIndex();
 });
+
+app.use(
+  '/',
+  (req, res, next) => {
+    if (req.url === '' || req.url === '/' || req.url === '/index.html') {
+        requireUser(req, res, next);
+        return;
+    }
+    next();
+  },
+  (req, res, next) => {
+    if ((req.url === '' || req.url === '/' || req.url === '/index.html') && !req.user) {
+        res.redirect('/auth-login');
+        return;
+    }
+
+    next();
+  },
+  express.static('static'),
+);
 
 /* start the server */
 app.listen(config.expressPort, () =>
