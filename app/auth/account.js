@@ -2,7 +2,7 @@ import moment from 'moment';
 import { EntityId } from 'redis-om';
 import { userRepository } from '../om/user-repository.js';
 import { checkPassword, decode, encode, generateHash } from './security.js';
-import { sessionRepository } from '../om/session-repository.js';
+import { authRepository } from '../om/auth-repository.js';
 
 const ACCESS_PREFIX = 'access';
 const REFRESH_PREFIX = 'refresh';
@@ -15,20 +15,28 @@ const REFRESH_PREFIX = 'refresh';
  * 4. Return both tokens
  *
  * @param {string} userId
- * @returns {Promise<{tokenexpireson: Date, refreshexpireson: Date, token: string, refresh: string}>}
+ * @returns {Promise<{tokenExpiresOn: Date, refreshExpiresOn: Date, token: string, refresh: string}>}
  */
 async function createAccessToken(userId) {
-  const session = await sessionRepository.save({
-    tokenexpireson: moment.utc().add(1, 'hour').toDate(),
-    refreshexpireson: moment.utc().add(120, 'days').toDate(),
+  const tokenExpiresOn = moment.utc().add(1, 'hour').toDate();
+  const refreshExpiresOn = moment.utc().add(120, 'days').toDate();
+
+  const auth = await authRepository.save({
+    tokenExpiresOn,
+    refreshExpiresOn,
     userId,
   });
-  const token = await encode(`${ACCESS_PREFIX}_${session[EntityId]}`);
-  const refresh = await encode(`${REFRESH_PREFIX}_${session[EntityId]}`);
+
+  const token = await encode(
+    `${ACCESS_PREFIX}_${auth[EntityId]}_${tokenExpiresOn}`,
+  );
+  const refresh = await encode(
+    `${REFRESH_PREFIX}_${token}_${refreshExpiresOn}`,
+  );
 
   return {
-    tokenexpireson: session.tokenexpireson,
-    refreshexpireson: session.refreshexpireson,
+    tokenExpiresOn: auth.tokenExpiresOn,
+    refreshExpiresOn: auth.refreshExpiresOn,
     token,
     refresh,
   };
@@ -43,10 +51,12 @@ async function createAccessToken(userId) {
  * 4. Lookup user in db, make sure one exists
  * 5. Create and return access token
  *
+ * @param {string} accessToken
  * @param {string} refreshToken
- * @returns {Promise<{tokenexpireson: Date, refreshexpireson: Date, token: string, refresh: string}>}
+ * @returns {Promise<{tokenExpiresOn: Date, refreshExpiresOn: Date, token: string, refresh: string}>}
  */
-async function refresh(refreshToken) {
+async function refresh(accessToken, refreshToken) {
+  console.log(`Refreshing: ${accessToken} ${refreshToken}`);
   if (typeof refreshToken !== 'string') {
     throw new Error('Expired');
   }
@@ -57,21 +67,31 @@ async function refresh(refreshToken) {
     throw new Error('Expired');
   }
 
-  const entityId = decoded.replace(`${REFRESH_PREFIX}_`, '');
-  const session = await sessionRepository.fetch(entityId);
+  const [, embeddedAccessToken, expiresOn] = decoded.split('_');
 
-  if (!session || moment(session.refreshexpireson).isBefore(moment())) {
+  if (
+    moment(expiresOn).isBefore(moment()) ||
+    embeddedAccessToken !== accessToken
+  ) {
     throw new Error('Expired');
   }
 
-  await sessionRepository.remove(entityId);
-  const user = await userRepository.fetch(session.userId);
+  const decodedAccessToken = await decode(embeddedAccessToken);
+  const [, authEntityId] = decodedAccessToken.split('_');
+  const auth = await authRepository.fetch(authEntityId);
+
+  if (!auth) {
+    throw new Error('Expired');
+  }
+
+  await authRepository.remove(authEntityId);
+  const user = await userRepository.fetch(auth.userId);
 
   if (!user) {
     throw new Error('Expired');
   }
 
-  return createAccessToken(session.userId);
+  return createAccessToken(auth.userId);
 }
 
 /**
@@ -83,7 +103,7 @@ async function refresh(refreshToken) {
  *
  * @param {string} username
  * @param {string} password
- * @returns {Promise<{tokenexpireson: Date, refreshexpireson: Date, token: string, refresh: string}>}
+ * @returns {Promise<{tokenExpiresOn: Date, refreshExpiresOn: Date, token: string, refresh: string}>}
  */
 async function login(username, password) {
   // lookup username in db, get hash
@@ -122,7 +142,7 @@ async function login(username, password) {
  *
  * @param {string} username
  * @param {string} password
- * @returns {Promise<{tokenexpireson: Date, refreshexpireson: Date, token: string, refresh: string}>}
+ * @returns {Promise<{tokenExpiresOn: Date, refreshExpiresOn: Date, token: string, refresh: string}>}
  */
 async function register(username, password) {
   const dbUser = await userRepository
@@ -147,29 +167,38 @@ async function register(username, password) {
 }
 
 async function getUserWithToken({ token, refresh: refreshToken }) {
-    if (!token) {
-        return;
-    }
+  if (!token) {
+    return;
+  }
 
-    const accessToken = await decode(token);
-    const sessionId = accessToken.replace(`${ACCESS_PREFIX}_`, '');
-    const session = await sessionRepository.fetch(sessionId);
+  const accessToken = await decode(token);
 
-    if (!session) {
-        return;
-    }
+  if (!(accessToken && accessToken.startsWith(ACCESS_PREFIX))) {
+    return;
+  }
 
-    const { userId, tokenexpireson } = session;
+  const [, authEntityId, tokenExpiresOn] = accessToken.split('_');
 
-    if (moment(tokenexpireson).isBefore(moment()) && refreshToken) {
-        const result = await refresh(refreshToken);
+  if (moment(tokenExpiresOn).isBefore(moment()) && refreshToken) {
+    const result = await refresh(token, refreshToken);
 
-        return getUserWithToken(result);
-    }
+    return getUserWithToken(result);
+  }
 
-    const user = await userRepository.fetch(userId);
+  const auth = await authRepository.fetch(authEntityId);
 
-    return user;
+  if (!auth) {
+    return;
+  }
+
+  const { userId } = auth;
+  const user = await userRepository.fetch(userId);
+
+  if (!user || !user[EntityId]) {
+    return;
+  }
+
+  return user;
 }
 
 export { login, register, createAccessToken, refresh, getUserWithToken };
