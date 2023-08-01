@@ -60,7 +60,7 @@ async function refresh(refreshToken) {
   const entityId = decoded.replace(`${REFRESH_PREFIX}_`, '');
   const session = await sessionRepository.fetch(entityId);
 
-  if (!session || session.refreshexpireson < moment.utc().toDate()) {
+  if (!session || moment(session.refreshexpireson).isBefore(moment())) {
     throw new Error('Expired');
   }
 
@@ -161,7 +161,7 @@ async function getUserWithToken({ token, refresh: refreshToken }) {
 
     const { userId, tokenexpireson } = session;
 
-    if (tokenexpireson < moment.utc().toDate() && refreshToken) {
+    if (moment(tokenexpireson).isBefore(moment()) && refreshToken) {
         const result = await refresh(refreshToken);
 
         return getUserWithToken(result);
