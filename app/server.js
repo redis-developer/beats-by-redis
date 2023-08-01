@@ -19,17 +19,10 @@ import { purchaseRepository } from './om/purchase-repository.js';
 import { userRepository } from './om/user-repository.js';
 import { authRepository } from './om/auth-repository.js';
 import { authRouter } from './routers/auth-router.js';
-import { getUserWithToken } from './auth/account.js';
+import { getUserFromSession, requireUserForApi } from './auth/middleware.js';
 
 const TWO_MIN = 1000 * 60 * 2;
 const PURCHASE_BALANCE = 'purchase_balance';
-
-/* configure your session store */
-const store = new RedisStackStore({
-  client: redis,
-  prefix: 'session:',
-  ttlInSeconds: 3600,
-});
 
 const app = express();
 
@@ -83,34 +76,21 @@ app.use(
   express.static('static', { index: 'auth-register.html' }),
 );
 
+/* configure your session store */
+const store = new RedisStackStore({
+  client: redis,
+  prefix: 'session:',
+  ttlInSeconds: 3600,
+});
+
 app.use(
   session({
     store: store,
     resave: false,
     saveUninitialized: false,
-    secret: '5UP3r 53Cr37',
+    secret: config.session.SECRET,
   }),
 );
-
-async function requireUser(req, res, next) {
-  if (req.user) {
-    next();
-    return;
-  }
-
-  const user = await getUserWithToken(req.session);
-
-  if (!user) {
-    next();
-    return;
-  }
-
-  req.user = {
-    username: user.username,
-  };
-
-  next();
-}
 
 /* bring in some routers */
 app.use('/auth', authRouter);
@@ -147,27 +127,28 @@ async function setupData() {
 
 setupData();
 
-app.get('/reset', (_req, res) => {
+app.get('/reset', getUserFromSession, requireUserForApi, (_req, res) => {
   redis.flushDb();
   redis.set('purchase_balance', 0);
   res.json({ message: 'Database reset successfully' });
   setupData();
 });
 
+function isIndex(url) {
+  return url === '' || url === '/' || url === '/index.html';
+}
+
 app.use(
   '/',
   (req, res, next) => {
-    if (req.url === '' || req.url === '/' || req.url === '/index.html') {
-      requireUser(req, res, next);
+    if (isIndex(req.url)) {
+      getUserFromSession(req, res, next);
       return;
     }
     next();
   },
   (req, res, next) => {
-    if (
-      (req.url === '' || req.url === '/' || req.url === '/index.html') &&
-      !req.user
-    ) {
+    if (isIndex(req.url) && !req.user) {
       res.redirect('/auth-login');
       return;
     }

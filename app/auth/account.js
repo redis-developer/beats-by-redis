@@ -3,9 +3,10 @@ import { EntityId } from 'redis-om';
 import { userRepository } from '../om/user-repository.js';
 import { checkPassword, decode, encode, generateHash } from './security.js';
 import { authRepository } from '../om/auth-repository.js';
+import { config } from '../config.js';
 
-const ACCESS_PREFIX = 'access';
-const REFRESH_PREFIX = 'refresh';
+const ACCESS_PREFIX = config.auth.ACCESS_PREFIX;
+const REFRESH_PREFIX = config.auth.REFRESH_PREFIX;
 
 /**
  * Create an access token

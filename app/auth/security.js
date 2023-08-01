@@ -3,17 +3,19 @@
  */
 import crypto from 'crypto';
 import util from 'util';
+import { config } from '../config.js';
 
-const SALT_ROUNDS = 1000;
-const HASH_LENGTH = 64;
-const SECRET = process.env.AUTH_SECRET ?? 'Amaze9-Thrill5-Disdain5-Fraying0';
-const ALGORITHM_NAME = 'aes-128-gcm';
-const ALGORITHM_NONCE_SIZE = 12;
-const ALGORITHM_TAG_SIZE = 16;
-const ALGORITHM_KEY_SIZE = 16;
-const PBKDF2_NAME = 'sha512';
-const PBKDF2_SALT_SIZE = 16;
-const PBKDF2_ITERATIONS = 32767;
+const cryptoConfig = config.auth.crypto;
+const SALT_ROUNDS = cryptoConfig.SALT_ROUNDS;
+const HASH_LENGTH = cryptoConfig.HASH_LENGTH;
+const SECRET = cryptoConfig.SECRET;
+const ALGORITHM_NAME = cryptoConfig.ALGORITHM_NAME;
+const ALGORITHM_NONCE_SIZE = cryptoConfig.ALGORITHM_NONCE_SIZE;
+const ALGORITHM_TAG_SIZE = cryptoConfig.ALGORITHM_TAG_SIZE;
+const ALGORITHM_KEY_SIZE = cryptoConfig.ALGORITHM_KEY_SIZE;
+const PBKDF2_NAME = cryptoConfig.PBKDF2_NAME;
+const PBKDF2_SALT_SIZE = cryptoConfig.PBKDF2_SALT_SIZE;
+const PBKDF2_ITERATIONS = cryptoConfig.PBKDF2_ITERATIONS;
 const pbkdf2 = util.promisify(crypto.pbkdf2);
 
 async function generateHash(password) {
