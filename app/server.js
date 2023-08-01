@@ -25,7 +25,7 @@ const PURCHASE_BALANCE = 'purchase_balance';
 /* configure your session store */
 const store = new RedisStackStore({
   client: redis,
-  prefix: 'redisBank:',
+  prefix: 'session:',
   ttlInSeconds: 3600,
 });
 
