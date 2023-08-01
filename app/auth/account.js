@@ -19,8 +19,8 @@ const REFRESH_PREFIX = config.auth.REFRESH_PREFIX;
  * @returns {Promise<{tokenExpiresOn: Date, refreshExpiresOn: Date, token: string, refresh: string}>}
  */
 async function createAccessToken(userId) {
-  const tokenExpiresOn = moment.utc().add(1, 'hour').toDate();
-  const refreshExpiresOn = moment.utc().add(120, 'days').toDate();
+  const tokenExpiresOn = moment.utc().add(1, 'hour').toISOString();
+  const refreshExpiresOn = moment.utc().add(120, 'days').toISOString();
 
   const auth = await authRepository.save({
     tokenExpiresOn,
