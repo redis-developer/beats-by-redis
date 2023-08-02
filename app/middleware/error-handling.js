@@ -3,6 +3,7 @@ function notFound(req, res) {
 }
 
 function serverError(err, req, res) {
+    console.log('Server Error Reached');
     console.error(err);
 
     if (res.headersSent) {
