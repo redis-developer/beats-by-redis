@@ -8,185 +8,205 @@ var transactionsOverview = new Vue({
     balance: '',
     question: '',
     searchitems: [],
-    areaOptions : {
+    areaOptions: {
       series: [],
       xaxis: {
-        type: "datetime",
+        type: 'datetime',
       },
       yaxis: {
-        decimalsInFloat: 2
+        decimalsInFloat: 2,
       },
       chart: {
         height: 200,
-        type: "area",
+        type: 'area',
       },
       dataLabels: {
         enabled: true,
       },
       stroke: {
-        curve: "smooth",
+        curve: 'smooth',
       },
       noData: {
-        text: 'Loading...'
-      }
+        text: 'Loading...',
+      },
     },
     areaChart: '',
-    pieOptions : {
+    pieOptions: {
       series: [],
       chart: {
         height: 200,
         type: 'donut',
         options: {
           chart: {
-            id: "chart-id"
-          }
-        }
+            id: 'chart-id',
+          },
+        },
+      },
+      plotOptions: {
+        pie: {
+          donut: {
+            size: '25%',
+          },
+        },
       },
       labels: [],
-      responsive: [{
-        breakpoint: 480,
-        options: {
-          chart: {
-            width: 200,
-            id: "chart-id"
+      responsive: [
+        {
+          breakpoint: 480,
+          options: {
+            chart: {
+              width: 200,
+              id: 'chart-id',
+            },
+            legend: {
+              position: 'bottom',
+            },
           },
-          legend: {
-            position: 'bottom'
-          }
-        }
-      }]
-      ,
+        },
+      ],
       noData: {
-        text: 'Loading...'
-      }
+        text: 'Loading...',
+      },
     },
-    piechart:''
+    piechart: '',
   },
   mounted() {
-    this.areaChart = new ApexCharts(document.querySelector("#area"), this.areaOptions);
-    this.areaChart.render()
-    this.pieChart = new ApexCharts(document.querySelector("#chart"), this.pieOptions);
-    this.pieChart.render()
-    this.getInitialData()
-    this.connect()
+    this.areaChart = new ApexCharts(
+      document.querySelector('#area'),
+      this.areaOptions,
+    );
+    this.areaChart.render();
+    this.pieChart = new ApexCharts(
+      document.querySelector('#chart'),
+      this.pieOptions,
+    );
+    this.pieChart.render();
+    this.getInitialData();
+    this.connect();
   },
   watch: {
     // whenever question changes, this function will run
     question: function (newQuestion, oldQuestion) {
-      this.searchitems = []
-      this.debouncedGetAnswer()
-    }
+      this.searchitems = [];
+      this.debouncedGetAnswer();
+    },
   },
   created: function () {
-    this.debouncedGetAnswer = _.debounce(this.getAnswer, 100)
+    this.debouncedGetAnswer = _.debounce(this.getAnswer, 100);
   },
   methods: {
     getInitialData: function () {
-      var transactionsUrl = 'purchase/purchases'
-      var vm = this
-      axios.get(transactionsUrl)
+      var transactionsUrl = 'purchase/purchases';
+      var vm = this;
+      axios
+        .get(transactionsUrl)
         .then(function (response) {
-          vm.items = response.data
-          vm.balance = response.data[0].balance
+          vm.items = response.data;
+          vm.balance = response.data[0].balance;
         })
         .catch(function (error) {
-          console.log('Error! Could not reach the API. ' + error)
-        })
+          console.log('Error! Could not reach the API. ' + error);
+        });
 
-        axios.get("/purchase/balance")
+      axios
+        .get('/purchase/balance')
         .then(function (response) {
-          vm.areaChart.updateSeries([{
-            name: 'value',
-            data: response.data
-          }])
+          vm.areaChart.updateSeries([
+            {
+              name: 'value',
+              data: response.data,
+            },
+          ]);
         })
         .catch(function (error) {
-          console.log('Error! Could not reach the API. ' + error)
-        })
+          console.log('Error! Could not reach the API. ' + error);
+        });
 
-      axios.get("/purchase/biggestspenders")
+      axios
+        .get('/purchase/biggestspenders')
         .then(function (response) {
+          vm.pieOptions.series = response.data.series;
+          vm.pieOptions.labels = response.data.labels;
 
-          vm.pieOptions.series = response.data.series
-          vm.pieOptions.labels = response.data.labels
-
-          vm.pieChart.destroy()
-          vm.pieChart = new ApexCharts(document.querySelector("#chart"), vm.pieOptions);
-          vm.pieChart.render()
-
+          vm.pieChart.destroy();
+          vm.pieChart = new ApexCharts(
+            document.querySelector('#chart'),
+            vm.pieOptions,
+          );
+          vm.pieChart.render();
         })
         .catch(function (error) {
-          console.log('Error! Could not reach the API. ' + error)
-        })
+          console.log('Error! Could not reach the API. ' + error);
+        });
     },
     connect: function () {
-      
-      var vm = this
-      var wsConfigUrl = '/api/config/ws'
-      axios.get(wsConfigUrl)
-        .then(function (response) {
+      var vm = this;
+      var wsConfigUrl = '/api/config/ws';
+      axios.get(wsConfigUrl).then(function (response) {
+        var wsConfig = response.data;
+        var url = `${wsConfig.protocol}://${wsConfig.host}:${wsConfig.port}${wsConfig.endpoint}`;
 
-          var wsConfig = response.data
-          var url = `${wsConfig.protocol}://${wsConfig.host}:${wsConfig.port}${wsConfig.endpoint}`
+        var ws = new WebSocket(url);
+        ws.onopen = (event) => {
+          ws.onmessage = (event) => {
+            let transactionObject = JSON.parse(event.data);
+            vm.items.unshift(transactionObject);
 
-          var ws= new WebSocket(url)
-          ws.onopen = event => {
-            ws.onmessage =  event => {
-              let transactionObject = JSON.parse(event.data)
-              vm.items.unshift(transactionObject)
-
-              if(vm.items.length > 10){
-                vm.items.pop()
-              }
-              vm.account = transactionObject.toAccount
-              vm.balance = parseInt(transactionObject.balance)
-
-              axios.get("/purchase/balance")
-                  .then(function (response) {
-                    vm.areaChart.updateSeries([{
-                      name: 'value',
-                      data: response.data
-                    }])
-                  })
-                  .catch(function (error) {
-                    console.log('Error! Could not reach the API. ' + error)
-                  })
-              axios.get("/purchase/biggestspenders")
-                  .then(function (response) {
-                
-                    vm.pieOptions.series = response.data.series
-                    vm.pieOptions.labels = response.data.labels
-                
-                    vm.pieChart.destroy()
-                    vm.pieChart = new ApexCharts(document.querySelector("#chart"), vm.pieOptions);                
-                    vm.pieChart.render()
-                
-                  })
-                  .catch(function (error) {
-                    console.log('Error! Could not reach the API. ' + error)
-                  })
+            if (vm.items.length > 10) {
+              vm.items.pop();
             }
-          }
-        })
+            vm.account = transactionObject.toAccount;
+            vm.balance = parseInt(transactionObject.balance);
 
-      },
+            axios
+              .get('/purchase/balance')
+              .then(function (response) {
+                vm.areaChart.updateSeries([
+                  {
+                    name: 'value',
+                    data: response.data,
+                  },
+                ]);
+              })
+              .catch(function (error) {
+                console.log('Error! Could not reach the API. ' + error);
+              });
+            axios
+              .get('/purchase/biggestspenders')
+              .then(function (response) {
+                vm.pieOptions.series = response.data.series;
+                vm.pieOptions.labels = response.data.labels;
+
+                vm.pieChart.destroy();
+                vm.pieChart = new ApexCharts(
+                  document.querySelector('#chart'),
+                  vm.pieOptions,
+                );
+                vm.pieChart.render();
+              })
+              .catch(function (error) {
+                console.log('Error! Could not reach the API. ' + error);
+              });
+          };
+        };
+      });
+    },
     getAnswer: function () {
-
-      var searchTerm = this.question
+      var searchTerm = this.question;
       if (this.question.length > 0) {
-        searchTerm = searchTerm.trim() + '*'
+        searchTerm = searchTerm.trim() + '*';
       }
 
-      var searchUrl = '/purchase/search?term=' + searchTerm
-      var vm = this
-      axios.get(searchUrl)
+      var searchUrl = '/purchase/search?term=' + searchTerm;
+      var vm = this;
+      axios
+        .get(searchUrl)
         .then(function (response) {
-          vm.searchitems = response.data
+          vm.searchitems = response.data;
         })
         .catch(function (error) {
-          console.log('Error! Could not reach the API. ' + error)
-        })
-    }
-
-  }
-})
+          console.log('Error! Could not reach the API. ' + error);
+        });
+    },
+  },
+});
