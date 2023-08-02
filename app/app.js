@@ -3,6 +3,7 @@ import * as cron from 'node-cron';
 
 import express from 'express';
 import bodyParser from 'body-parser';
+import { WebSocketServer } from 'ws';
 
 import session from 'express-session';
 import { RedisStackStore } from 'connect-redis-stack';
@@ -10,7 +11,7 @@ import { config } from './config.js';
 import { redis, redis2 } from './om/client.js';
 import * as account from './components/account/index.js';
 import * as purchase from './components/purchases/index.js';
-import { WebSocketServer } from 'ws';
+import * as errorMiddleware from './middleware/error-handling.js';
 
 const TWO_MIN = 1000 * 60 * 2;
 const PURCHASE_BALANCE = 'purchase_balance';
@@ -149,5 +150,8 @@ app.use(
   },
   express.static('static'),
 );
+
+app.use(errorMiddleware.notFound);
+app.use(errorMiddleware.serverError);
 
 export { app };
