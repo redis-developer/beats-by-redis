@@ -5,8 +5,9 @@ import { checkPassword, decode, encode, generateHash } from './security.js';
 import { authRepository } from '../om/auth-repository.js';
 import { config } from '../config.js';
 
-const ACCESS_PREFIX = config.auth.ACCESS_PREFIX;
-const REFRESH_PREFIX = config.auth.REFRESH_PREFIX;
+const authConfig = config.auth;
+const ACCESS_PREFIX = authConfig.ACCESS_PREFIX;
+const REFRESH_PREFIX = authConfig.REFRESH_PREFIX;
 
 /**
  * Create an access token
@@ -19,8 +20,14 @@ const REFRESH_PREFIX = config.auth.REFRESH_PREFIX;
  * @returns {Promise<{tokenExpiresOn: Date, refreshExpiresOn: Date, token: string, refresh: string}>}
  */
 async function createAccessToken(userId) {
-  const tokenExpiresOn = moment.utc().add(1, 'hour').toISOString();
-  const refreshExpiresOn = moment.utc().add(120, 'days').toISOString();
+  const tokenExpiresOn = moment
+    .utc()
+    .add(...authConfig.TOKEN_EXPIRATION)
+    .toISOString();
+  const refreshExpiresOn = moment
+    .utc()
+    .add(...authConfig.REFRESH_EXPIRATION)
+    .toISOString();
 
   const auth = await authRepository.save({
     tokenExpiresOn,
@@ -61,13 +68,13 @@ async function createAccessToken(userId) {
  */
 async function refresh(accessToken, refreshToken) {
   if (typeof refreshToken !== 'string') {
-    throw new Error('Expired');
+    throw new Error('Invalid user credentials');
   }
 
   const decoded = await decode(refreshToken);
 
   if (!decoded.startsWith(REFRESH_PREFIX)) {
-    throw new Error('Expired');
+    throw new Error('Invalid user credentials');
   }
 
   const [, embeddedAccessToken, expiresOn] = decoded.split('_');
@@ -77,7 +84,7 @@ async function refresh(accessToken, refreshToken) {
     moment(expiresOn).isBefore(moment()) ||
     embeddedAccessToken !== accessToken
   ) {
-    throw new Error('Expired');
+    throw new Error('Expired user credentials');
   }
 
   const decodedAccessToken = await decode(embeddedAccessToken);
@@ -85,14 +92,14 @@ async function refresh(accessToken, refreshToken) {
   const auth = await authRepository.fetch(authEntityId);
 
   if (!auth) {
-    throw new Error('Expired');
+    throw new Error('Invalid user credentials');
   }
 
   await authRepository.remove(authEntityId);
   const user = await userRepository.fetch(auth.userId);
 
   if (!user) {
-    throw new Error('Expired');
+    throw new Error('Invalid user credentials');
   }
 
   return createAccessToken(auth.userId);
@@ -120,17 +127,13 @@ async function login(username, password) {
     .first();
 
   if (!dbUser) {
-    throw new Error('Login failed, invalid credentials');
+    throw new Error('Login failed, invalid user credentials');
   }
 
-  const isPasswordCorrect = await checkPassword(
-    password,
-    dbUser.hash,
-    dbUser.salt,
-  );
+  const isPasswordCorrect = checkPassword(password, dbUser.hash, dbUser.salt);
 
   if (!isPasswordCorrect) {
-    throw new Error('Login failed, invalid credentials');
+    throw new Error('Login failed, invalid user credentials');
   }
 
   return createAccessToken(dbUser[EntityId]);

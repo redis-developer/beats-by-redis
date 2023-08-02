@@ -8,6 +8,8 @@ export const config = {
   auth: {
     ACCESS_PREFIX: 'access',
     REFRESH_PREFIX: 'refresh',
+    TOKEN_EXPIRATION: [1, 'hour'],
+    REFRESH_EXPIRATION: [120, 'days'],
     crypto: {
         SALT_ROUNDS: 1000,
         HASH_LENGTH: 64,

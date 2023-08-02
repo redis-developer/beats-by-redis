@@ -18,6 +18,12 @@ const PBKDF2_SALT_SIZE = cryptoConfig.PBKDF2_SALT_SIZE;
 const PBKDF2_ITERATIONS = cryptoConfig.PBKDF2_ITERATIONS;
 const pbkdf2 = util.promisify(crypto.pbkdf2);
 
+/**
+ * Generates hash for the given password
+ *
+ * @param {string} password
+ * @returns {Promise<{salt: string, hash: string}>}
+ */
 async function generateHash(password) {
   if (typeof password !== 'string') {
     throw new Error('Password must be a string');
@@ -37,7 +43,15 @@ async function generateHash(password) {
   };
 }
 
-async function checkPassword(password, hash, salt) {
+/**
+ * Checks if the given password matches the given hash
+ *
+ * @param {string} password
+ * @param {string} hash
+ * @param {string} salt
+ * @returns {boolean}
+ */
+function checkPassword(password, hash, salt) {
   if (
     typeof password !== 'string' ||
     typeof hash !== 'string' ||
@@ -52,6 +66,13 @@ async function checkPassword(password, hash, salt) {
   return deCodedHash === hash;
 }
 
+/**
+ * Encrypts the given text.
+ *
+ * @param {Buffer} text
+ * @param {Buffer} key
+ * @returns {Buffer}
+ */
 function encrypt(text, key) {
   // Generate a 96-bit nonce using a CSPRNG.
   const nonce = crypto.randomBytes(ALGORITHM_NONCE_SIZE);
@@ -65,14 +86,21 @@ function encrypt(text, key) {
   return Buffer.concat([nonce, cipherText, cipher.getAuthTag()]);
 }
 
+/**
+ * Decrypts the given buffer.
+ *
+ * @param {Buffer} cipherTextAndNonce
+ * @param {Buffer} key
+ * @returns {Buffer}
+ */
 function decrypt(cipherTextAndNonce, key) {
   // Create buffers of nonce, cipherText and tag.
-  const nonce = cipherTextAndNonce.slice(0, ALGORITHM_NONCE_SIZE);
-  const cipherText = cipherTextAndNonce.slice(
+  const nonce = cipherTextAndNonce.subarray(0, ALGORITHM_NONCE_SIZE);
+  const cipherText = cipherTextAndNonce.subarray(
     ALGORITHM_NONCE_SIZE,
     cipherTextAndNonce.length - ALGORITHM_TAG_SIZE,
   );
-  const tag = cipherTextAndNonce.slice(
+  const tag = cipherTextAndNonce.subarray(
     cipherText.length + ALGORITHM_NONCE_SIZE,
   );
 
@@ -85,6 +113,12 @@ function decrypt(cipherTextAndNonce, key) {
   return Buffer.concat([cipher.update(cipherText), cipher.final()]);
 }
 
+/**
+ * Encrypts the given text.
+ *
+ * @param {string} text
+ * @returns {Promise<string>}
+ */
 async function encode(text) {
   // Generate a 128-bit salt using a CSPRNG.
   const salt = crypto.randomBytes(PBKDF2_SALT_SIZE);
@@ -108,6 +142,12 @@ async function encode(text) {
   return cipherTextAndNonceAndSalt.toString('base64');
 }
 
+/**
+ * Decrypts the given base64 string.
+ *
+ * @param {Buffer} base64CipherTextAndNonceAndSalt
+ * @returns {Promise<string>}
+ */
 async function decode(base64CipherTextAndNonceAndSalt) {
   try {
     // Decode the base64.
@@ -117,9 +157,9 @@ async function decode(base64CipherTextAndNonceAndSalt) {
     );
 
     // Create buffers of salt and cipherTextAndNonce.
-    const salt = cipherTextAndNonceAndSalt.slice(0, PBKDF2_SALT_SIZE);
+    const salt = cipherTextAndNonceAndSalt.subarray(0, PBKDF2_SALT_SIZE);
     const cipherTextAndNonce =
-      cipherTextAndNonceAndSalt.slice(PBKDF2_SALT_SIZE);
+      cipherTextAndNonceAndSalt.subarray(PBKDF2_SALT_SIZE);
 
     // Derive the key using PBKDF2.
     const key = await pbkdf2(
