@@ -1,6 +1,6 @@
 import { Repository, Schema } from 'redis-om';
 
-import { redis } from './client.js';
+import { redis } from '../../om/client.js';
 
 const userSchema = new Schema('user', {
   username: { type: 'string' },

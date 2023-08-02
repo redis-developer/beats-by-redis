@@ -1,15 +1,15 @@
 import { Router } from 'express';
-import { redis } from '../om/client.js';
-import { purchaseRepository } from '../om/purchase-repository.js';
+import { redis } from '../../om/client.js';
+import { purchaseRepository } from './purchase-repository.js';
 
-export const purchaseRouter = Router();
+export const router = Router();
 
 const ONE_DAY = 1000 * 60 * 60 * 24;
 const SALES_TS = 'sales_ts';
 const SORTED_SET_KEY = 'bigspenders';
 
 /* fetch all transactions up to an hour ago */
-purchaseRouter.get('/balance', async (req, res) => {
+router.get('/balance', async (req, res) => {
   const balance = await redis.ts.range(
     SALES_TS,
     Date.now() - ONE_DAY,
@@ -26,7 +26,7 @@ purchaseRouter.get('/balance', async (req, res) => {
 });
 
 /* fetch top 5 biggest spenders */
-purchaseRouter.get('/biggestspenders', async (req, res) => {
+router.get('/biggestspenders', async (req, res) => {
   const range = await redis.zRangeWithScores(SORTED_SET_KEY, -5, -1);
   let series = [];
   let labels = [];
@@ -39,7 +39,7 @@ purchaseRouter.get('/biggestspenders', async (req, res) => {
   res.send({ series, labels });
 });
 
-purchaseRouter.get('/search', async (req, res) => {
+router.get('/search', async (req, res) => {
   const term = req.query.term;
   let results;
 
@@ -59,7 +59,7 @@ purchaseRouter.get('/search', async (req, res) => {
 });
 
 /* return ten most recent transactions */
-purchaseRouter.get('/purchases', async (req, res) => {
+router.get('/purchases', async (req, res) => {
   const purchases = await purchaseRepository
     .search()
     .sortBy('utc_date', 'DESC')

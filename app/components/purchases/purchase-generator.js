@@ -1,5 +1,5 @@
-import { redis } from '../om/client.js';
-import { replacer, getPurchases } from './utilities.js';
+import { redis } from '../../om/client.js';
+import { replacer, getPurchases } from './purchase-utilities.js';
 
 const PURCHASE_BALANCE = 'purchase_balance';
 const PURCHASE_STREAM = 'purchases';

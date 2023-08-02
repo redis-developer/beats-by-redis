@@ -1,4 +1,4 @@
-import { getUserWithToken } from './account.js';
+import { getUserWithToken } from './account-authenticator.js';
 
 async function getUserFromSession(req, res, next) {
   if (req.user) {
@@ -31,7 +31,7 @@ function requireUserForApi(req, res, next) {
 
 function requireUserOrRedirect(req, res, next) {
   if (!req.user) {
-    res.redirect('/auth-login');
+    res.redirect('/login');
     return;
   }
 

@@ -47,18 +47,18 @@ let currentId = '$'
 
 cron.schedule('*/10 * * * * *', async () => {
   const userName = process.env.REDIS_USERNAME
-  
+
   // TODO: should we place this in the purchaseGenerator file with its own cron job and have the xread in a while loop here?
   // createBankpurchase(userName)
   const result = await redis2.xRead({ key: streamKey, id: currentId }, { COUNT: 1, BLOCK: 10000 });
-  
+
   // pull the values for the event out of the result
   const [ { messages } ] = result
   const [ { id, message } ] = messages
   const event = { ...message }
 
   sockets.forEach(socket => socket.send(JSON.stringify(event)))
-  
+
   // update the current id so we get the next event next time
   currentId = id
 });
@@ -83,7 +83,7 @@ app.post('/perform_login', (req, res) => {
       session.userid=req.body.username;
       res.redirect('/index.html')
   } else {
-    res.redirect('/auth-login.html')
+    res.redirect('/login.html')
   }
 })
 

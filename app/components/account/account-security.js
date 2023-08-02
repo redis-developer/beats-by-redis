@@ -3,7 +3,7 @@
  */
 import crypto from 'crypto';
 import util from 'util';
-import { config } from '../config.js';
+import { config } from '../../config.js';
 
 const cryptoConfig = config.auth.crypto;
 const SALT_ROUNDS = cryptoConfig.SALT_ROUNDS;

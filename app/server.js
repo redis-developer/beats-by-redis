@@ -6,19 +6,11 @@ import bodyParser from 'body-parser';
 
 import session from 'express-session';
 import { RedisStackStore } from 'connect-redis-stack';
-import {
-  createAlbumPurchase,
-  addPurchasesToStream,
-} from './purchases/purchaseGenerator.js';
 import { config } from './config.js';
 import { redis, redis2 } from './om/client.js';
-import { purchaseRouter } from './routers/purchase-router.js';
+import * as account from './components/account/index.js';
+import * as purchase from './components/purchases/index.js';
 import { WebSocketServer } from 'ws';
-import { purchaseRepository } from './om/purchase-repository.js';
-import { userRepository } from './om/user-repository.js';
-import { authRepository } from './om/auth-repository.js';
-import { authRouter } from './routers/auth-router.js';
-import { getUserFromSession, requireUserForApi } from './auth/middleware.js';
 
 const TWO_MIN = 1000 * 60 * 2;
 const PURCHASE_BALANCE = 'purchase_balance';
@@ -44,7 +36,7 @@ let currentId = '$';
 
 cron.schedule('*/60 * * * * *', async () => {
   // This loads fresh purchases into stream
-  addPurchasesToStream();
+  purchase.generator.addPurchasesToStream();
 });
 
 // read from the stream create a JSON object then send to UI
@@ -60,7 +52,7 @@ cron.schedule('*/5 * * * * *', async () => {
   const balance = await redis.get(PURCHASE_BALANCE);
   event.balance = balance;
   // create Redis JSON
-  createAlbumPurchase(event);
+  purchase.generator.createAlbumPurchase(event);
 
   // send to UI
   sockets.forEach((socket) => socket.send(JSON.stringify(event)));
@@ -69,11 +61,8 @@ cron.schedule('*/5 * * * * *', async () => {
   currentId = id;
 });
 
-app.use('/auth-login', express.static('static', { index: 'auth-login.html' }));
-app.use(
-  '/auth-register',
-  express.static('static', { index: 'auth-register.html' }),
-);
+app.use('/login', express.static('static', { index: 'login.html' }));
+app.use('/register', express.static('static', { index: 'register.html' }));
 
 /* configure your session store */
 const store = new RedisStackStore({
@@ -92,8 +81,8 @@ app.use(
 );
 
 /* bring in some routers */
-app.use('/auth', authRouter);
-app.use('/purchase', purchaseRouter);
+app.use('/account', account.router);
+app.use('/purchase', purchase.router);
 
 /* websocket poll response */
 app.get('/api/config/ws', (req, res) => {
@@ -107,7 +96,7 @@ app.get('/api/config/ws', (req, res) => {
 
 // prime the stream "pump"
 app.get('/bc', async (req, res) => {
-  const result = addPurchasesToStream();
+  const result = purchase.generator.addPurchasesToStream();
   res.send(result);
 });
 
@@ -118,19 +107,24 @@ async function setupData() {
     await redis.ts.create('sales_ts', { DUPLICATE_POLICY: 'FIRST' });
   }
 
-  purchaseRepository.createIndex();
-  authRepository.createIndex();
-  userRepository.createIndex();
+  purchase.repositories.purchase.createIndex();
+  account.repositories.account.createIndex();
+  account.repositories.user.createIndex();
 }
 
 setupData();
 
-app.get('/reset', getUserFromSession, requireUserForApi, (_req, res) => {
-  redis.flushDb();
-  redis.set('purchase_balance', 0);
-  res.json({ message: 'Database reset successfully' });
-  setupData();
-});
+app.get(
+  '/reset',
+  account.middleware.getUserFromSession,
+  account.middleware.requireUserForApi,
+  (_req, res) => {
+    redis.flushDb();
+    redis.set('purchase_balance', 0);
+    res.json({ message: 'Database reset successfully' });
+    setupData();
+  },
+);
 
 function isIndex(url) {
   return url === '' || url === '/' || url === '/index.html';
@@ -140,14 +134,14 @@ app.use(
   '/',
   (req, res, next) => {
     if (isIndex(req.url)) {
-      getUserFromSession(req, res, next);
+      account.middleware.getUserFromSession(req, res, next);
       return;
     }
     next();
   },
   (req, res, next) => {
     if (isIndex(req.url) && !req.user) {
-      res.redirect('/auth-login');
+      res.redirect('/login');
       return;
     }
 

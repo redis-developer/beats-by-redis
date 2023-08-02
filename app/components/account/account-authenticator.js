@@ -1,9 +1,9 @@
 import moment from 'moment';
 import { EntityId } from 'redis-om';
-import { userRepository } from '../om/user-repository.js';
-import { checkPassword, decode, encode, generateHash } from './security.js';
-import { authRepository } from '../om/auth-repository.js';
-import { config } from '../config.js';
+import { userRepository } from './account-user-repository.js';
+import { checkPassword, decode, encode, generateHash } from './account-security.js';
+import { accountRepository } from './account-repository.js';
+import { config } from '../../config.js';
 
 const authConfig = config.auth;
 const ACCESS_PREFIX = authConfig.ACCESS_PREFIX;
@@ -29,14 +29,14 @@ async function createAccessToken(userId) {
     .add(...authConfig.REFRESH_EXPIRATION)
     .toISOString();
 
-  const auth = await authRepository.save({
+  const auth = await accountRepository.save({
     tokenExpiresOn,
     refreshExpiresOn,
     userId,
   });
 
   const duration = moment.duration(moment(refreshExpiresOn).diff(moment()));
-  await authRepository.expire(auth[EntityId], Math.round(duration.asSeconds()));
+  await accountRepository.expire(auth[EntityId], Math.round(duration.asSeconds()));
 
   const token = await encode(
     `${ACCESS_PREFIX}_${auth[EntityId]}_${tokenExpiresOn}`,
@@ -89,13 +89,13 @@ async function refresh(accessToken, refreshToken) {
 
   const decodedAccessToken = await decode(embeddedAccessToken);
   const [, authEntityId] = decodedAccessToken.split('_');
-  const auth = await authRepository.fetch(authEntityId);
+  const auth = await accountRepository.fetch(authEntityId);
 
   if (!auth) {
     throw new Error('Invalid user credentials');
   }
 
-  await authRepository.remove(authEntityId);
+  await accountRepository.remove(authEntityId);
   const user = await userRepository.fetch(auth.userId);
 
   if (!user) {
@@ -195,7 +195,7 @@ async function getUserWithToken({ token, refresh: refreshToken }) {
     return getUserWithToken(result);
   }
 
-  const auth = await authRepository.fetch(authEntityId);
+  const auth = await accountRepository.fetch(authEntityId);
 
   if (!auth) {
     return;

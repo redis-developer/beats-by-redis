@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { login, register } from '../auth/account.js';
+import { login, register } from './account-authenticator.js';
 
-export const authRouter = Router();
+export const router = Router();
 
-authRouter.post('/login', async (req, res) => {
+router.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
   try {
@@ -19,7 +19,7 @@ authRouter.post('/login', async (req, res) => {
   }
 });
 
-authRouter.post('/register', async (req, res) => {
+router.post('/register', async (req, res) => {
   const { username, password } = req.body;
 
   try {
