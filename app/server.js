@@ -12,7 +12,6 @@ import {
 } from './purchases/purchaseGenerator.js';
 import { config } from './config.js';
 import { redis, redis2 } from './om/client.js';
-import { accountRouter } from './routers/account-router.js';
 import { purchaseRouter } from './routers/purchase-router.js';
 import { WebSocketServer } from 'ws';
 import { purchaseRepository } from './om/purchase-repository.js';
@@ -94,7 +93,6 @@ app.use(
 
 /* bring in some routers */
 app.use('/auth', authRouter);
-app.use('/account', accountRouter);
 app.use('/purchase', purchaseRouter);
 
 /* websocket poll response */
