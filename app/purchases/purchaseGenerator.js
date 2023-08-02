@@ -11,12 +11,12 @@ const TRIM = {
   threshold: 100, // Retain around 100 entries.
 };
 
-export const getBCPurchases = async () => {
+async function getBCPurchases() {
   const bcPayload = await getPurchases();
   return bcPayload;
-};
+}
 
-export const addPurchasesToStream = async () => {
+async function addPurchasesToStream() {
   // api call to get purchases
   const purchases = await getPurchases();
   // adds purchases to stream
@@ -31,9 +31,9 @@ export const addPurchasesToStream = async () => {
   await redis.ts.add(SALES_TS, '*', purchases.purchases.length, {
     DUPLICATE_POLICY: 'FIRST',
   });
-};
+}
 
-const createPurchaseAmount = async (artist_name, amount_paid_usd) => {
+async function createPurchaseAmount(artist_name, amount_paid_usd) {
   let balance = await redis.get(PURCHASE_BALANCE);
   balance = parseInt(balance);
   balance += amount_paid_usd;
@@ -43,9 +43,9 @@ const createPurchaseAmount = async (artist_name, amount_paid_usd) => {
   redis.set(PURCHASE_BALANCE, balance);
 
   return amount_paid_usd;
-};
+}
 
-export const createAlbumPurchase = async (purchase) => {
+async function createAlbumPurchase(purchase) {
   /* Grab an artist from the stream. keep track of the entity id */
   purchase.artist_name = purchase.artist_name.replaceAll(':', ';');
   purchase.utc_date_raw = parseFloat(purchase.utc_date);
@@ -62,4 +62,6 @@ export const createAlbumPurchase = async (purchase) => {
 
   createPurchaseAmount(purchase.artist_name, purchase.amount_paid_usd);
   return purchaseJSON;
-};
+}
+
+export { getBCPurchases, addPurchasesToStream, createAlbumPurchase };
