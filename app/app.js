@@ -48,12 +48,14 @@ cron.schedule('*/5 * * * * *', async () => {
   // pull the values for the event out of the result
   const [{ messages }] = result;
   const [{ id, message }] = messages;
-  const event = { ...message };
+  const purchaseMessage = { ...message };
   // create Redis JSON
-  purchase.generator.createAlbumPurchase(event);
+  purchase.generator.createAlbumPurchase(purchaseMessage);
 
   // send to UI
-  sockets.forEach((socket) => socket.send(JSON.stringify(event)));
+  sockets.forEach((socket) =>
+    socket.send(JSON.stringify({ purchase: purchaseMessage })),
+  );
 
   // update the current id so we get the next event next time
   currentId = id;

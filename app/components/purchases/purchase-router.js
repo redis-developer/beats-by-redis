@@ -9,20 +9,14 @@ const SALES_TS = 'sales_ts';
 const SORTED_SET_KEY = 'bigspenders';
 
 /* fetch all transactions up to an hour ago */
-router.get('/balance', async (req, res) => {
-  const balance = await redis.ts.range(
+router.get('/history', async (req, res) => {
+  const history = await redis.ts.range(
     SALES_TS,
     Date.now() - ONE_DAY,
     Date.now(),
   );
 
-  let balancePayload = balance.map((entry) => {
-    return {
-      x: entry.timestamp,
-      y: entry.value,
-    };
-  });
-  res.send(balancePayload);
+  res.send(history);
 });
 
 /* fetch top 5 biggest spenders */
@@ -64,5 +58,6 @@ router.get('/purchases', async (req, res) => {
     .search()
     .sortBy('utc_date', 'DESC')
     .return.all({ pageSize: 10 });
+
   res.send(purchases.slice(0, 10));
 });

@@ -102,19 +102,23 @@ var transactionsOverview = new Vue({
         .get(transactionsUrl)
         .then(function (response) {
           vm.items = response.data;
-          vm.balance = response.data[0].balance;
         })
         .catch(function (error) {
           console.log('Error! Could not reach the API. ' + error);
         });
 
       axios
-        .get('/purchase/balance')
+        .get('/purchase/history')
         .then(function (response) {
           vm.areaChart.updateSeries([
             {
               name: 'value',
-              data: response.data,
+              data: response.data.map((entry) => {
+                return {
+                  x: entry.timestamp,
+                  y: entry.value,
+                };
+              }),
             },
           ]);
         })
@@ -149,8 +153,8 @@ var transactionsOverview = new Vue({
         var ws = new WebSocket(url);
         ws.onopen = (event) => {
           ws.onmessage = (event) => {
-            let transactionObject = JSON.parse(event.data);
-            vm.items.unshift(transactionObject);
+            let { purchase } = JSON.parse(event.data);
+            vm.items.unshift(purchase);
 
             if (vm.items.length > 10) {
               vm.items.pop();
