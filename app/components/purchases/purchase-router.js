@@ -57,7 +57,7 @@ router.get('/purchases', async (req, res) => {
   const purchases = await purchaseRepository
     .search()
     .sortBy('utc_date', 'DESC')
-    .return.all({ pageSize: 10 });
+    .return.page(0, 10);
 
   res.send(purchases.slice(0, 10));
 });
