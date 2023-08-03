@@ -152,11 +152,11 @@ new Vue({
         var ws = new WebSocket(url);
         ws.onopen = () => {
           ws.onmessage = (event) => {
-            let { purchase } = JSON.parse(event.data);
-            vm.items.unshift(purchase);
+            let { purchases } = JSON.parse(event.data);
+            vm.items = vm.items.concat(purchases);
 
             if (vm.items.length > 10) {
-              vm.items.pop();
+              vm.items = vm.items.slice(0, 9);
             }
 
             axios

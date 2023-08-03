@@ -1,5 +1,4 @@
 import 'dotenv/config.js';
-import * as cron from 'node-cron';
 
 import express from 'express';
 import bodyParser from 'body-parser';
@@ -8,12 +7,10 @@ import { WebSocketServer } from 'ws';
 import session from 'express-session';
 import { RedisStackStore } from 'connect-redis-stack';
 import { config } from './config.js';
-import { redis, redis2 } from './om/client.js';
+import { redis } from './om/client.js';
 import * as account from './components/account/index.js';
 import * as purchase from './components/purchases/index.js';
 import * as errorMiddleware from './middleware/error-handling.js';
-
-const TWO_MIN = 1000 * 60 * 2;
 
 const app = express();
 
@@ -31,35 +28,7 @@ wss.on('connection', (socket) => {
   socket.on('close', () => sockets.delete(socket));
 });
 
-const streamKey = 'purchases';
-let currentId = '$';
-
-cron.schedule('*/60 * * * * *', async () => {
-  // This loads fresh purchases into stream
-  purchase.generator.addPurchasesToStream();
-});
-
-// read from the stream create a JSON object then send to UI
-cron.schedule('*/5 * * * * *', async () => {
-  const result = await redis2.xRead(
-    { key: streamKey, id: currentId },
-    { COUNT: 1, BLOCK: TWO_MIN },
-  );
-  // pull the values for the event out of the result
-  const [{ messages }] = result;
-  const [{ id, message }] = messages;
-  const purchaseMessage = { ...message };
-  // create Redis JSON
-  purchase.generator.createAlbumPurchase(purchaseMessage);
-
-  // send to UI
-  sockets.forEach((socket) =>
-    socket.send(JSON.stringify({ purchase: purchaseMessage })),
-  );
-
-  // update the current id so we get the next event next time
-  currentId = id;
-});
+purchase.stream.initialize(sockets);
 
 app.use('/login', express.static('static', { index: 'login.html' }));
 app.use('/register', express.static('static', { index: 'register.html' }));
@@ -92,12 +61,6 @@ app.get('/api/config/ws', (req, res) => {
     port: '80',
     endpoint: '/websocket',
   });
-});
-
-// prime the stream "pump"
-app.get('/bc', async (req, res) => {
-  const result = purchase.generator.addPurchasesToStream();
-  res.send(result);
 });
 
 async function setupData() {

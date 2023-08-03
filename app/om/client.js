@@ -9,6 +9,7 @@ export const redis = createClient({ url });
 export const redis2 = redis.duplicate();
 
 redis.on('error', (error) => console.log('Redis Client Error', error));
+redis2.on('error', (error) => console.log('Redis Client2 Error', error));
 
 await redis.connect();
 await redis2.connect();
