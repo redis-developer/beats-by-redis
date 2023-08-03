@@ -1,8 +1,14 @@
+import cron from 'node-cron';
 import { commandOptions } from 'redis';
 import { redis, redis2 } from '../../om/client.js';
 import { createAlbumPurchase } from './purchase-generator.js';
 import { replacer, getPurchases, wait } from './purchase-utilities.js';
 import { purchaseRepository } from './purchase-repository.js';
+import {
+  topSellers,
+  purchaseHistory,
+  recentPurchases,
+} from './purchase-queries.js';
 
 const PURCHASE_STREAM = 'purchases';
 const SALES_TS = 'sales_ts';
@@ -34,29 +40,28 @@ async function streamPurchases() {
     // adds purchases to stream
     let lastSale = 0;
     for (let sale of events) {
-        for (let purchase of sale.items) {
-            purchase.utc_date_raw = purchase.utc_date;
-            await redis.xAdd(
-                PURCHASE_STREAM,
-                '*',
-                JSON.parse(JSON.stringify(purchase, replacer)),
-                { TRIM },
-            );
-        }
+      for (let purchase of sale.items) {
+        purchase.utc_date_raw = purchase.utc_date;
+        await redis.xAdd(
+          PURCHASE_STREAM,
+          '*',
+          JSON.parse(JSON.stringify(purchase, replacer)),
+          { TRIM },
+        );
+      }
 
-        const timeDiff = sale.utc_date - lastSale;
+      const timeDiff = sale.utc_date - lastSale;
 
-        if (lastSale > 0) {
-            await wait(Math.round(timeDiff * 1000));
-        }
+      if (lastSale > 0) {
+        await wait(Math.round(timeDiff * 1000));
+      }
 
-        lastSale = sale.utc_date;
-
+      lastSale = sale.utc_date;
     }
 
     const waitForMs = Math.round((end_date + 120) * 1000 - Date.now()) + 3000;
     if (waitForMs > 0) {
-        await wait(waitForMs);
+      await wait(waitForMs);
     }
   }
 }
@@ -109,10 +114,7 @@ async function listenForPurchases(sockets) {
         }
       }
 
-      const purchases = await purchaseRepository
-        .search()
-        .sortBy('utc_date_raw', 'DESC')
-        .return.page(0, 10);
+      const purchases = await recentPurchases();
 
       // send to UI
       sockets.forEach((socket) => {
@@ -126,7 +128,24 @@ async function listenForPurchases(sockets) {
 }
 
 async function initialize(sockets) {
+  cron.schedule('*/60 * * * * *', async () => {
+    const topSellersData = await topSellers();
+    const purchaseHistoryData = await purchaseHistory();
+
+    console.log('sending top sellers and purchase history to the UI');
+    // send to UI
+    sockets.forEach((socket) => {
+      socket.send(
+        JSON.stringify({
+          topSellers: topSellersData,
+          purchaseHistory: purchaseHistoryData,
+        }),
+      );
+    });
+  });
+
   streamPurchases();
+
   listenForPurchases(sockets);
 }
 

@@ -1,64 +1,29 @@
 import { Router } from 'express';
-import { redis } from '../../om/client.js';
-import { purchaseRepository } from './purchase-repository.js';
+import {
+  purchaseHistory,
+  topSellers,
+  search,
+  recentPurchases,
+} from './purchase-queries.js';
 
 export const router = Router();
 
-const ONE_DAY = 1000 * 60 * 60 * 24;
-const SALES_TS = 'sales_ts';
-const SORTED_SET_KEY = 'bigspenders';
-
 /* fetch all transactions up to an hour ago */
 router.get('/history', async (req, res) => {
-  const history = await redis.ts.range(
-    SALES_TS,
-    Date.now() - ONE_DAY,
-    Date.now(),
-  );
-
-  res.send(history);
+  res.send(await purchaseHistory());
 });
 
-/* fetch top 5 biggest spenders */
-router.get('/biggestspenders', async (req, res) => {
-  const range = await redis.zRangeWithScores(SORTED_SET_KEY, -5, -1);
-  let series = [];
-  let labels = [];
-
-  range.slice(0, 5).forEach((spender) => {
-    series.push(parseFloat(spender.score.toFixed(2)));
-    labels.push(spender.value);
-  });
-
-  res.send({ series, labels });
+/* fetch the 5 top sellers */
+router.get('/top-sellers', async (req, res) => {
+  res.send(await topSellers());
 });
 
 router.get('/search', async (req, res) => {
   const term = req.query.term;
-  let results;
-
-  if (term.length > 3) {
-    results = await purchaseRepository
-      .search()
-      .where('artist_name')
-      .matches(term)
-      .or('album_title')
-      .matches(term)
-      .or('item_description')
-      .matches(term)
-      .sortBy('utc_date_raw', 'DESC')
-      .return.page(0, 10);
-  }
-
-  res.send(results);
+  res.send(await search(term));
 });
 
 /* return ten most recent transactions */
 router.get('/purchases', async (req, res) => {
-  const purchases = await purchaseRepository
-    .search()
-    .sortBy('utc_date_raw', 'DESC')
-    .return.page(0, 10);
-
-  res.send(purchases.slice(0, 10));
+    res.send(await recentPurchases());
 });

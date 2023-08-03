@@ -38,17 +38,4 @@ async function wait(ms) {
     });
 }
 
-// async function wait(ms) {
-//   if (ms <= 1000) {
-//     return new Promise((resolve) => {
-//       setTimeout(resolve, ms);
-//     });
-//   }
-
-//   console.log(Math.round(ms / 1000));
-//   await wait(1000);
-
-//   return wait(ms - 1000);
-// }
-
 export { createAmount, getRandom, replacer, getPurchases, wait };

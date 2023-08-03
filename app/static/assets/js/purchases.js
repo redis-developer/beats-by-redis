@@ -126,7 +126,7 @@ new Vue({
         });
 
       axios
-        .get('/purchase/biggestspenders')
+        .get('/purchase/top-sellers')
         .then(function (response) {
           vm.pieOptions.series = response.data.series;
           vm.pieOptions.labels = response.data.labels;
@@ -152,49 +152,45 @@ new Vue({
         var ws = new WebSocket(url);
         ws.onopen = () => {
           ws.onmessage = (event) => {
-            let { purchases } = JSON.parse(event.data);
-            let items = purchases.concat(vm.items);
+            let { purchases, topSellers, purchaseHistory } = JSON.parse(
+              event.data,
+            );
 
-            if (items.length > 10) {
-              items = items.slice(0, 10);
+            if (Array.isArray(purchases)) {
+              let items = purchases.concat(vm.items);
+
+              if (items.length > 10) {
+                items = items.slice(0, 10);
+              }
+
+              vm.items = items;
             }
 
-            vm.items = items;
+            if (purchaseHistory) {
+              vm.areaChart.updateSeries([
+                {
+                  name: 'value',
+                  data: purchaseHistory.map((entry) => {
+                    return {
+                      x: entry.timestamp,
+                      y: entry.value,
+                    };
+                  }),
+                },
+              ]);
+            }
 
-            axios
-              .get('/purchase/history')
-              .then(function (response) {
-                vm.areaChart.updateSeries([
-                  {
-                    name: 'value',
-                    data: response.data.map((entry) => {
-                      return {
-                        x: entry.timestamp,
-                        y: entry.value,
-                      };
-                    }),
-                  },
-                ]);
-              })
-              .catch(function (error) {
-                console.log('Error! Could not reach the API. ' + error);
-              });
-            axios
-              .get('/purchase/biggestspenders')
-              .then(function (response) {
-                vm.pieOptions.series = response.data.series;
-                vm.pieOptions.labels = response.data.labels;
+            if (topSellers) {
+              vm.pieOptions.series = topSellers.series;
+              vm.pieOptions.labels = topSellers.labels;
 
-                vm.pieChart.destroy();
-                vm.pieChart = new ApexCharts(
-                  document.querySelector('#chart'),
-                  vm.pieOptions,
-                );
-                vm.pieChart.render();
-              })
-              .catch(function (error) {
-                console.log('Error! Could not reach the API. ' + error);
-              });
+              vm.pieChart.destroy();
+              vm.pieChart = new ApexCharts(
+                document.querySelector('#chart'),
+                vm.pieOptions,
+              );
+              vm.pieChart.render();
+            }
           };
         };
       });
