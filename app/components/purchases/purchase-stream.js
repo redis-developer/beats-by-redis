@@ -14,8 +14,8 @@ const TRIM = {
 const STREAM_KEY = 'purchases';
 const STREAM_GROUP = `${STREAM_KEY}-group`;
 const STREAM_CONSUMER = `${STREAM_KEY}-consumer`;
-const MAX_PURCHASE_TRANSACTIONS = 100;
-const BLOCK_MILLISECONDS = 30 * 1000;
+const MAX_PURCHASE_TRANSACTIONS = 10;
+const BLOCK_MILLISECONDS = 1000;
 
 async function streamPurchases() {
   // api call to get purchases
@@ -23,11 +23,7 @@ async function streamPurchases() {
   while (true) {
     const { end_date, events } = await getPurchases();
     const purchases = events.reduce((acc, e) => {
-      if (e.event_type === 'sale') {
-        acc = acc.concat(e.items);
-      }
-
-      return acc;
+      return acc.concat(e.items);
     }, []);
 
     // adds most recent number of purchases into ts
@@ -36,21 +32,32 @@ async function streamPurchases() {
     });
 
     // adds purchases to stream
-    await Promise.all(
-      purchases.map(async (purchase) => {
-        purchase.utc_date_raw = purchase.utc_date;
+    let lastSale = 0;
+    for (let sale of events) {
+        for (let purchase of sale.items) {
+            purchase.utc_date_raw = purchase.utc_date;
+            await redis.xAdd(
+                PURCHASE_STREAM,
+                '*',
+                JSON.parse(JSON.stringify(purchase, replacer)),
+                { TRIM },
+            );
+        }
 
-        await redis.xAdd(
-          PURCHASE_STREAM,
-          '*',
-          JSON.parse(JSON.stringify(purchase, replacer)),
-          { TRIM },
-        );
-      }),
-    );
+        const timeDiff = sale.utc_date - lastSale;
 
-    const waitForMs = Math.round((end_date + 60) * 1000 - Date.now()) + 3000;
-    await wait(waitForMs);
+        if (lastSale > 0) {
+            await wait(Math.round(timeDiff * 1000));
+        }
+
+        lastSale = sale.utc_date;
+
+    }
+
+    const waitForMs = Math.round((end_date + 120) * 1000 - Date.now()) + 3000;
+    if (waitForMs > 0) {
+        await wait(waitForMs);
+    }
   }
 }
 
@@ -108,7 +115,9 @@ async function listenForPurchases(sockets) {
         .return.page(0, 10);
 
       // send to UI
-      sockets.forEach((socket) => socket.send(JSON.stringify({ purchases })));
+      sockets.forEach((socket) => {
+        socket.send(JSON.stringify({ purchases }));
+      });
     } catch (e) {
       console.log('xReadGroup error');
       console.log(e);
