@@ -96,10 +96,9 @@ new Vue({
   },
   methods: {
     getInitialData: function () {
-      var transactionsUrl = 'purchase/purchases';
       var vm = this;
       axios
-        .get(transactionsUrl)
+        .get('purchase/purchases')
         .then(function (response) {
           vm.items = response.data;
         })
