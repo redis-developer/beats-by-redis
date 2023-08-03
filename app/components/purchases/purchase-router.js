@@ -46,9 +46,10 @@ router.get('/search', async (req, res) => {
       .matches(term)
       .or('item_description')
       .matches(term)
-      // .or('transactionType').equals(term)
-      .return.all({ pageSize: 1000 });
+      .sortBy('utc_date_raw', 'DESC')
+      .return.page(0, 10);
   }
+
   res.send(results);
 });
 
@@ -56,7 +57,7 @@ router.get('/search', async (req, res) => {
 router.get('/purchases', async (req, res) => {
   const purchases = await purchaseRepository
     .search()
-    .sortBy('utc_date', 'DESC')
+    .sortBy('utc_date_raw', 'DESC')
     .return.page(0, 10);
 
   res.send(purchases.slice(0, 10));

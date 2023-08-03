@@ -101,6 +101,12 @@ new Vue({
         .get('purchase/purchases')
         .then(function (response) {
           vm.items = response.data;
+
+          vm.items.forEach((item) => {
+            item.secondsAgo = Math.round(
+              (Date.now() - Date.parse(item.utc_date)) / 1000,
+            );
+          });
         })
         .catch(function (error) {
           console.log('Error! Could not reach the API. ' + error);
@@ -153,11 +159,21 @@ new Vue({
         ws.onopen = () => {
           ws.onmessage = (event) => {
             let { purchases } = JSON.parse(event.data);
-            vm.items = vm.items.concat(purchases);
+            vm.items = purchases.concat(vm.items);
 
             if (vm.items.length > 10) {
-              vm.items = vm.items.slice(0, 9);
+              vm.items = vm.items.slice(0, 10);
             }
+
+            vm.items.forEach((item) => {
+              if (item.secondsAgo) {
+                return;
+              }
+
+              item.secondsAgo = Math.round(
+                (Date.now() - Date.parse(item.utc_date)) / 1000,
+              );
+            });
 
             axios
               .get('/purchase/history')

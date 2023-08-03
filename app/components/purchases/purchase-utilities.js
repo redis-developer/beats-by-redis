@@ -20,17 +20,11 @@ function replacer(key, value) {
 }
 
 async function getPurchases() {
-  const twoMinutesAgo = Date.now() / 1000 - 120;
-  const bcEndpoint = `https://bandcamp.com/api/salesfeed/1/get?start_date=${twoMinutesAgo}`;
+  const bcEndpoint = `https://bandcamp.com/api/salesfeed/1/get`;
 
   try {
     const response = await fetch(bcEndpoint, { method: 'GET' });
-    const data = await response.json();
-
-    return {
-      timestmap: twoMinutesAgo,
-      purchases: data.events,
-    };
+    return response.json();
   } catch (err) {
     return {
       error: err,
@@ -38,4 +32,10 @@ async function getPurchases() {
   }
 }
 
-export { createAmount, getRandom, replacer, getPurchases };
+async function wait(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+export { createAmount, getRandom, replacer, getPurchases, wait };

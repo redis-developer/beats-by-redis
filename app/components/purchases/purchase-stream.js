@@ -1,8 +1,7 @@
-import * as cron from 'node-cron';
 import { commandOptions } from 'redis';
 import { redis, redis2 } from '../../om/client.js';
 import { createAlbumPurchase } from './purchase-generator.js';
-import { replacer, getPurchases } from './purchase-utilities.js';
+import { replacer, getPurchases, wait } from './purchase-utilities.js';
 import { purchaseRepository } from './purchase-repository.js';
 
 const PURCHASE_STREAM = 'purchases';
@@ -16,31 +15,43 @@ const STREAM_KEY = 'purchases';
 const STREAM_GROUP = `${STREAM_KEY}-group`;
 const STREAM_CONSUMER = `${STREAM_KEY}-consumer`;
 const MAX_PURCHASE_TRANSACTIONS = 100;
-const BLOCK_SECONDS = 5;
+const BLOCK_MILLISECONDS = 30 * 1000;
 
-async function addPurchasesToStream() {
+async function streamPurchases() {
   // api call to get purchases
-  const { purchases } = await getPurchases();
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const { end_date, events } = await getPurchases();
+    const purchases = events.reduce((acc, e) => {
+      if (e.event_type === 'sale') {
+        acc = acc.concat(e.items);
+      }
 
-  // adds most recent number of purchases into ts
-  await redis.ts.add(SALES_TS, '*', purchases.length, {
-    DUPLICATE_POLICY: 'FIRST',
-  });
+      return acc;
+    }, []);
 
-  // adds purchases to stream
-  await Promise.all(
-    purchases
-      .map(async (purchase) => {
+    // adds most recent number of purchases into ts
+    await redis.ts.add(SALES_TS, '*', purchases.length, {
+      DUPLICATE_POLICY: 'FIRST',
+    });
+
+    // adds purchases to stream
+    await Promise.all(
+      purchases.map(async (purchase) => {
         purchase.utc_date_raw = purchase.utc_date;
 
         await redis.xAdd(
           PURCHASE_STREAM,
           '*',
-          JSON.parse(JSON.stringify(purchase.items[0], replacer)),
+          JSON.parse(JSON.stringify(purchase, replacer)),
           { TRIM },
         );
       }),
-  );
+    );
+
+    const waitForMs = Math.round((end_date + 60) * 1000 - Date.now()) + 3000;
+    await wait(waitForMs);
+  }
 }
 
 async function listenForPurchases(sockets) {
@@ -71,15 +82,13 @@ async function listenForPurchases(sockets) {
         ],
         {
           COUNT: MAX_PURCHASE_TRANSACTIONS,
-          BLOCK: BLOCK_SECONDS,
+          BLOCK: BLOCK_MILLISECONDS,
         },
       );
 
       if (!Array.isArray(results) || results.length === 0) {
         continue;
       }
-
-      const purchases = [];
 
       for (let result of results) {
         // pull the values for the event out of the result
@@ -88,16 +97,15 @@ async function listenForPurchases(sockets) {
           // create Redis JSON
           await createAlbumPurchase(purchase);
 
-          purchases.push(purchase);
-
           // acknowledge the message
           await redis2.xAck(STREAM_KEY, STREAM_GROUP, message.id);
         }
       }
 
-      if (purchases.length === 0) {
-        continue;
-      }
+      const purchases = await purchaseRepository
+        .search()
+        .sortBy('utc_date_raw', 'DESC')
+        .return.page(0, 10);
 
       // send to UI
       sockets.forEach((socket) => socket.send(JSON.stringify({ purchases })));
@@ -109,21 +117,8 @@ async function listenForPurchases(sockets) {
 }
 
 async function initialize(sockets) {
-  // Don't overload the Bandcamp API, so only poll once a minute.
-  cron.schedule('*/60 * * * * *', async () => {
-    // This loads fresh purchases into stream
-    await addPurchasesToStream();
-  });
-
-  // If we don't have purchases in the db, we should prime the stream with some purchases
-  // otherwise, don't bother. This eliminates calling the Bandcamp API every time the app restarts
-  const purchases = await purchaseRepository.search().count();
-
-  if (!purchases || purchases === 0) {
-    await addPurchasesToStream();
-  }
-
+  streamPurchases();
   listenForPurchases(sockets);
 }
 
-export { addPurchasesToStream, listenForPurchases, initialize };
+export { initialize };

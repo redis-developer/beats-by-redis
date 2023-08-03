@@ -1,12 +1,6 @@
 import { redis } from '../../om/client.js';
-import { getPurchases } from './purchase-utilities.js';
 
 const SORTED_SET_KEY = 'bigspenders';
-
-async function getBCPurchases() {
-  const bcPayload = await getPurchases();
-  return bcPayload;
-}
 
 async function createPurchaseAmount(artist_name, amount_paid_usd) {
   await redis.zIncrBy(SORTED_SET_KEY, amount_paid_usd, artist_name);
@@ -33,4 +27,4 @@ async function createAlbumPurchase(purchase) {
   return purchaseJSON;
 }
 
-export { getBCPurchases, createAlbumPurchase };
+export { createAlbumPurchase };
