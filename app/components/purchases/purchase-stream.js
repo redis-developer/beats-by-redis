@@ -20,21 +20,27 @@ const BLOCK_SECONDS = 5;
 
 async function addPurchasesToStream() {
   // api call to get purchases
-  const purchases = await getPurchases();
-
-  // adds purchases to stream
-  purchases.purchases.forEach((purchase) => {
-    purchase.utc_date_raw = purchase.utc_date;
-    const preparedPurchase = JSON.parse(
-      JSON.stringify(purchase.items[0], replacer),
-    );
-    redis.XADD(PURCHASE_STREAM, '*', preparedPurchase, { TRIM });
-  });
+  const { purchases } = await getPurchases();
 
   // adds most recent number of purchases into ts
-  await redis.ts.add(SALES_TS, '*', purchases.purchases.length, {
+  await redis.ts.add(SALES_TS, '*', purchases.length, {
     DUPLICATE_POLICY: 'FIRST',
   });
+
+  // adds purchases to stream
+  await Promise.all(
+    purchases
+      .map(async (purchase) => {
+        purchase.utc_date_raw = purchase.utc_date;
+
+        await redis.xAdd(
+          PURCHASE_STREAM,
+          '*',
+          JSON.parse(JSON.stringify(purchase.items[0], replacer)),
+          { TRIM },
+        );
+      }),
+  );
 }
 
 async function listenForPurchases(sockets) {
