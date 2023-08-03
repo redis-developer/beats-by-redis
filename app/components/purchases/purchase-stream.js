@@ -3,7 +3,6 @@ import { commandOptions } from 'redis';
 import { redis, redis2 } from '../../om/client.js';
 import { createAlbumPurchase } from './purchase-generator.js';
 import { replacer, getPurchases, wait } from './purchase-utilities.js';
-import { purchaseRepository } from './purchase-repository.js';
 import {
   topSellers,
   purchaseHistory,
