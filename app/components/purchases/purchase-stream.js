@@ -70,11 +70,8 @@ async function listenForPurchases(sockets) {
     await redis2.xGroupCreate(STREAM_KEY, STREAM_GROUP, '0', {
       MKSTREAM: true,
     });
-  } catch (e) {
-    console.log(
-      `Consumer group ${STREAM_GROUP} already exists in stream ${STREAM_KEY}!`,
-    );
-  }
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -127,11 +124,11 @@ async function listenForPurchases(sockets) {
 }
 
 async function initialize(sockets) {
+  // Every minute we will update the time series and top sellers
   cron.schedule('*/60 * * * * *', async () => {
     const topSellersData = await topSellers();
     const purchaseHistoryData = await purchaseHistory();
 
-    console.log('sending top sellers and purchase history to the UI');
     // send to UI
     sockets.forEach((socket) => {
       socket.send(
@@ -143,8 +140,10 @@ async function initialize(sockets) {
     });
   });
 
+  // Read in new sales events from Bandcamp and stream them into the app
   streamPurchases();
 
+  // Listen for new stream events, process the data, store in redis, and pass along to the frontend
   listenForPurchases(sockets);
 }
 
