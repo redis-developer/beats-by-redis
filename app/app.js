@@ -14,7 +14,6 @@ import * as purchase from './components/purchases/index.js';
 import * as errorMiddleware from './middleware/error-handling.js';
 
 const TWO_MIN = 1000 * 60 * 2;
-const PURCHASE_BALANCE = 'purchase_balance';
 
 const app = express();
 
@@ -50,8 +49,6 @@ cron.schedule('*/5 * * * * *', async () => {
   const [{ messages }] = result;
   const [{ id, message }] = messages;
   const event = { ...message };
-  const balance = await redis.get(PURCHASE_BALANCE);
-  event.balance = balance;
   // create Redis JSON
   purchase.generator.createAlbumPurchase(event);
 
@@ -121,7 +118,6 @@ app.get(
   account.middleware.requireUserForApi,
   (_req, res) => {
     redis.flushDb();
-    redis.set('purchase_balance', 0);
     res.json({ message: 'Database reset successfully' });
     setupData();
   },

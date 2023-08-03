@@ -1,7 +1,6 @@
 import { redis } from '../../om/client.js';
 import { replacer, getPurchases } from './purchase-utilities.js';
 
-const PURCHASE_BALANCE = 'purchase_balance';
 const PURCHASE_STREAM = 'purchases';
 const SALES_TS = 'sales_ts';
 const SORTED_SET_KEY = 'bigspenders';
@@ -34,13 +33,7 @@ async function addPurchasesToStream() {
 }
 
 async function createPurchaseAmount(artist_name, amount_paid_usd) {
-  let balance = await redis.get(PURCHASE_BALANCE);
-  balance = parseInt(balance);
-  balance += amount_paid_usd;
-
   redis.zIncrBy(SORTED_SET_KEY, amount_paid_usd, artist_name);
-
-  redis.set(PURCHASE_BALANCE, balance);
 
   return amount_paid_usd;
 }

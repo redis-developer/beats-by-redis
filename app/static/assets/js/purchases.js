@@ -155,8 +155,6 @@ var transactionsOverview = new Vue({
             if (vm.items.length > 10) {
               vm.items.pop();
             }
-            vm.account = transactionObject.toAccount;
-            vm.balance = parseInt(transactionObject.balance);
 
             axios
               .get('/purchase/balance')
