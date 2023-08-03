@@ -21,7 +21,7 @@ var transactionsOverview = new Vue({
         type: 'area',
       },
       dataLabels: {
-        enabled: true,
+        enabled: false,
       },
       stroke: {
         curve: 'smooth',

@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 function createAmount() {
   const random = getRandom();
   let amount = ((random / 100) % 300).toFixed(2);
@@ -25,20 +23,19 @@ async function getPurchases() {
   const twoMinutesAgo = Date.now() / 1000 - 120;
   const bcEndpoint = `https://bandcamp.com/api/salesfeed/1/get?start_date=${twoMinutesAgo}`;
 
-  const bandcampPayload = await fetch(bcEndpoint, { method: 'GET' })
-    .then((data) => data.json())
-    .then((data) => {
-      return {
-        timestmap: twoMinutesAgo,
-        purchases: data.events,
-      };
-    })
-    .catch((err) => {
-      return {
-        error: err,
-      };
-    });
-  return bandcampPayload;
+  try {
+    const response = await fetch(bcEndpoint, { method: 'GET' });
+    const data = await response.json();
+
+    return {
+      timestmap: twoMinutesAgo,
+      purchases: data.events,
+    };
+  } catch (err) {
+    return {
+      error: err,
+    };
+  }
 }
 
 export { createAmount, getRandom, replacer, getPurchases };
