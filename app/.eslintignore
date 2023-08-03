@@ -1,4 +1,8 @@
 node_modules/
-static/
+static/assets/js/extensions
+static/assets/js/*.min.js
+static/assets/js/vendors.js
+static/assets/js/vue.js
+static/assets/vendors
 package-lock.json
 package.json

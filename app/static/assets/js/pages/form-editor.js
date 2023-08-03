@@ -1,32 +1,32 @@
-var snow = new Quill('#snow', {
+new Quill('#snow', {
     theme: 'snow'
 });
-var bubble = new Quill('#bubble', {
+new Quill('#bubble', {
     theme: 'bubble'
 });
-new Quill("#full", { 
-    bounds: "#full-container .editor", 
-    modules: { 
+new Quill("#full", {
+    bounds: "#full-container .editor",
+    modules: {
         toolbar: [
-            [{ font: [] }, { size: [] }], 
-            ["bold", "italic", "underline", "strike"], 
+            [{ font: [] }, { size: [] }],
+            ["bold", "italic", "underline", "strike"],
             [
-                { color: [] }, 
+                { color: [] },
                 { background: [] }
-            ], 
+            ],
             [
-                { script: "super" }, 
+                { script: "super" },
                 { script: "sub" }
-            ], 
+            ],
             [
-                { list: "ordered" }, 
-                { list: "bullet" }, 
-                { indent: "-1" }, 
+                { list: "ordered" },
+                { list: "bullet" },
+                { indent: "-1" },
                 { indent: "+1" }
-            ], 
-            ["direction", { align: [] }], 
-            ["link", "image", "video"], 
-            ["clean"]] 
-        }, 
-        theme: "snow" 
+            ],
+            ["direction", { align: [] }],
+            ["link", "image", "video"],
+            ["clean"]]
+        },
+        theme: "snow"
     })

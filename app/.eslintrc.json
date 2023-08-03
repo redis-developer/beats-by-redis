@@ -8,5 +8,12 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "rules": {}
+  "overrides": [
+    {
+        "files": ["static/**/*.js"],
+        "rules": {
+            "no-undef": "off"
+        }
+    }
+  ]
 }
