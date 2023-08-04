@@ -47,7 +47,7 @@ Replace this line with your work:
 
 ## _Challenge 3_: Read from the Stream of Transactions ##
 
-Using Node Redis, you'll want to read the most recent entry in the Redis stream with the key `transactions`. Use the `$` symbol to retrieve the most recent entry within your stream read call. Parse through the results until you have a transaction object literal. You'll want to block for at least 10 seconds to capture the most recent entry. This call should be made with the second Redis connection `redis2` to prevent locking out any other Redis calls.
+Using Node Redis, you'll want to read the most recent entry in the Redis stream with the key `transactions`. Use the `$` symbol to retrieve the most recent entry within your stream read call. Parse through the results until you have a transaction object literal. You'll want to block for at least 10 seconds to capture the most recent entry. This call should be made with the second Redis connection `redisStreamClient` to prevent locking out any other Redis calls.
 
 Replace this line with your work:
 

@@ -8,7 +8,7 @@ import bodyParser from 'body-parser'
 import session from 'express-session'
 import { RedisStackStore } from 'connect-redis-stack'
 import { config } from './config.js'
-import { redis, redis2 } from './om/client.js'
+import { redis, redisStreamClient } from './om/client.js'
 import { accountRouter } from './routers/account-router.js'
 import { purchaseRouter } from './routers/purchase-router.js'
 import { WebSocketServer } from 'ws';
@@ -50,7 +50,7 @@ cron.schedule('*/10 * * * * *', async () => {
 
   // TODO: should we place this in the purchaseGenerator file with its own cron job and have the xread in a while loop here?
   // createBankpurchase(userName)
-  const result = await redis2.xRead({ key: streamKey, id: currentId }, { COUNT: 1, BLOCK: 10000 });
+  const result = await redisStreamClient.xRead({ key: streamKey, id: currentId }, { COUNT: 1, BLOCK: 10000 });
 
   // pull the values for the event out of the result
   const [ { messages } ] = result

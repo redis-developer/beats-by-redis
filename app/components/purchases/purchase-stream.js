@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { commandOptions } from 'redis';
-import { redis, redis2 } from '../../om/client.js';
+import { redis, redisStreamClient } from '../../om/client.js';
 import { createAlbumPurchase } from './purchase-generator.js';
 import { replacer, getPurchases, wait } from './purchase-utilities.js';
 import {
@@ -67,7 +67,7 @@ async function streamPurchases() {
 
 async function listenForPurchases(sockets) {
   try {
-    await redis2.xGroupCreate(STREAM_KEY, STREAM_GROUP, '0', {
+    await redisStreamClient.xGroupCreate(STREAM_KEY, STREAM_GROUP, '0', {
       MKSTREAM: true,
     });
     // eslint-disable-next-line no-empty
@@ -76,7 +76,7 @@ async function listenForPurchases(sockets) {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
-      const results = await redis2.xReadGroup(
+      const results = await redisStreamClient.xReadGroup(
         commandOptions({
           isolated: true,
         }),
@@ -106,7 +106,7 @@ async function listenForPurchases(sockets) {
           await createAlbumPurchase(purchase);
 
           // acknowledge the message
-          await redis2.xAck(STREAM_KEY, STREAM_GROUP, message.id);
+          await redisStreamClient.xAck(STREAM_KEY, STREAM_GROUP, message.id);
         }
       }
 
