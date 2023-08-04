@@ -17,9 +17,7 @@ const TRIM = {
   threshold: 100, // Retain around 100 entries.
 };
 const STREAM_KEY = 'purchases';
-const STREAM_GROUP = `${STREAM_KEY}-group`;
-const STREAM_CONSUMER = `${STREAM_KEY}-consumer`;
-const MAX_PURCHASE_TRANSACTIONS = 10;
+const MAX_MESSAGES = 10;
 const BLOCK_MILLISECONDS = 1000;
 
 async function streamPurchases() {
@@ -66,30 +64,19 @@ async function streamPurchases() {
 }
 
 async function listenForPurchases(sockets) {
-  try {
-    await redisStreamClient.xGroupCreate(STREAM_KEY, STREAM_GROUP, '0', {
-      MKSTREAM: true,
-    });
-    // eslint-disable-next-line no-empty
-  } catch (e) {}
-
   // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
-      const results = await redisStreamClient.xReadGroup(
+      const results = await redisStreamClient.xRead(
         commandOptions({
           isolated: true,
         }),
-        STREAM_GROUP,
-        STREAM_CONSUMER,
-        [
-          {
-            key: STREAM_KEY,
-            id: '>',
-          },
-        ],
         {
-          COUNT: MAX_PURCHASE_TRANSACTIONS,
+          key: STREAM_KEY,
+          id: '$',
+        },
+        {
+          COUNT: MAX_MESSAGES,
           BLOCK: BLOCK_MILLISECONDS,
         },
       );
@@ -104,9 +91,6 @@ async function listenForPurchases(sockets) {
           const purchase = { ...message.message };
           // create Redis JSON
           await createAlbumPurchase(purchase);
-
-          // acknowledge the message
-          await redisStreamClient.xAck(STREAM_KEY, STREAM_GROUP, message.id);
         }
       }
 
@@ -117,7 +101,7 @@ async function listenForPurchases(sockets) {
         socket.send(JSON.stringify({ purchases }));
       });
     } catch (e) {
-      console.log('xReadGroup error');
+      console.log('xRead error');
       console.log(e);
     }
   }

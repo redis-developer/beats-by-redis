@@ -1,12 +1,12 @@
 services:
-  redis:
-    image: redis/redis-stack:latest
-    volumes:
-      - ./data:/data
-    ports:
-      - '6379:6379'
-      - '8001:8001'
-    restart: always
+  # redis:
+  #   image: redis/redis-stack:latest
+  #   volumes:
+  #     - ./data:/data
+  #   ports:
+  #     - '6379:6379'
+  #     - '8001:8001'
+  #   restart: always
 
   app:
     build: ./app
@@ -18,5 +18,5 @@ services:
     env_file:
       - .env
     restart: always
-    depends_on:
-      - redis
+    # depends_on:
+    #   - redis
