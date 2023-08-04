@@ -17,8 +17,22 @@ new Vue({
           format: 'h:mmtt',
         },
       },
+      tooltip: {
+        x: {
+          format: 'h:mmtt',
+        },
+        y: {
+            formatter: function (value) {
+                return value;
+            },
+            title: () => 'purchases'
+        }
+      },
       yaxis: {
         decimalsInFloat: 2,
+        title: {
+            text: 'Purchases',
+        }
       },
       chart: {
         height: 200,
@@ -115,7 +129,7 @@ new Vue({
         .then(function (response) {
           vm.areaChart.updateSeries([
             {
-              name: 'value',
+              name: 'Purchases',
               data: response.data.map((entry) => {
                 return {
                   x: entry.timestamp,
