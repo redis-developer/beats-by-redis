@@ -8,6 +8,7 @@ const purchaseSchema = new Schema('purchase', {
   utc_date_raw: { type: 'date', sortable: true },
   artist_name: { type: 'text' },
   item_description: { type: 'text' },
+  country: { type: 'string' },
   album_title: { type: 'text' },
 });
 

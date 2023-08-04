@@ -32,6 +32,8 @@ async function search(term) {
       .matches(term)
       .or('item_description')
       .matches(term)
+      .or('country')
+      .equals(term)
       .sortBy('utc_date_raw', 'DESC')
       .return.page(0, 10);
   }
