@@ -12,6 +12,10 @@ new Vue({
       series: [],
       xaxis: {
         type: 'datetime',
+        labels: {
+          datetimeUTC: false,
+          format: 'h:mmtt',
+        },
       },
       yaxis: {
         decimalsInFloat: 2,
