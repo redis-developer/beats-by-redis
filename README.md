@@ -51,9 +51,9 @@ Beats-By-Redis allows account registration and login in order to stream purchase
 
 ```json
 {
-"tokenExpiresOn": 1691169643.241
-"refreshExpiresOn": 1701534043.242
-"userId": "01H6YHTCNRVT8QEB60ES7YG8XW"
+    "tokenExpiresOn": 1691169643.241,
+    "refreshExpiresOn": 1701534043.242,
+    "userId": "01H6YHTCNRVT8QEB60ES7YG8XW"
 }
 ```
 
@@ -68,15 +68,41 @@ Session storage is also handled through Redis with the package [Connect Redis St
 }
 ```
 
+## Account API
+
+Beats-By-Redis provides an API for account registration and login. The API uses Redis JSON to store account information. Tokens are used for validating authentication, and are stored in a session cookie.
+
+### Login API
+
+|               |                                             |
+| ------------- | ------------------------------------------- |
+| Endpoint      | `/account/login`                            |
+| Code Location | `/app/components/account/account-router.js` |
+| Parameters    | `{ username: string; password: string; }`   |
+| Return value  | Redirected to `/`                           |
+
+The Login API looks up a username in Redis, and gets a hashed password. It then validates the hashed password against the password provided by the user. If it's correct, it creates and stores an access token and refresh token in the session and redirects to the dashbaord.
+
+### Register API
+
+|               |                                             |
+| ------------- | ------------------------------------------- |
+| Endpoint      | `/account/register`                         |
+| Code Location | `/app/components/account/account-router.js` |
+| Parameters    | `{ username: string; password: string; }`   |
+| Return value  | Redirected to `/`                           |
+
+The Register API looks up a username in Redis. Assuming the user doesn't already exist, it creates a new user with a hashed password. Then it creates and stores an access token and refresh token in the session and redirects to the dashbaord.
+
 ## Purchases API
 
-Beats-By_redis provides an API for the timeseries chart to track sales history, a pie chart of the top five earners, a search endpoint to return specific purchases for artists or by country, and a list of the most recent purchases. A websocket connection provides the most purchases in real time, as well as top spenders and purchase history every minute.
+Beats-By-Redis provides an API for the timeseries chart to track sales history, a pie chart of the top five earners, a search endpoint to return specific purchases for artists or by country, and a list of the most recent purchases. A websocket connection provides the most purchases in real time, as well as top spenders and purchase history every minute.
 
 ### Search API
 
 |                  |                                                |
 | ---------------- | ---------------------------------------------- |
-| Endpoint         | `/purchases/search`                            |
+| Endpoint         | `/purchase/search`                             |
 | Code Location    | `/app/components/purchases/purchase-router.js` |
 | Query Parameters | term                                           |
 | Return value     | array of results matching term                 |

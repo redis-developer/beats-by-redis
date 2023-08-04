@@ -117,9 +117,6 @@ async function refresh(accessToken, refreshToken) {
  * @returns {Promise<{tokenExpiresOn: Date, refreshExpiresOn: Date, token: string, refresh: string}>}
  */
 async function login(username, password) {
-  // lookup username in db, get hash
-  // check password
-  // if correct, create access token
   const dbUser = await userRepository
     .search()
     .where('username')
