@@ -3,7 +3,7 @@ import { purchaseRepository } from './purchase-repository.js';
 
 const ONE_HOUR = 1000 * 60 * 60;
 const SALES_TS = 'sales_ts';
-const SORTED_SET_KEY = 'bigspenders';
+const SORTED_SET_KEY = 'top-sellers';
 
 async function purchaseHistory() {
   return redis.ts.range(SALES_TS, Date.now() - ONE_HOUR, Date.now());

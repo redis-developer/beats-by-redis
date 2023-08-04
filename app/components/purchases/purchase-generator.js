@@ -1,6 +1,6 @@
 import { redis } from '../../om/client.js';
 
-const SORTED_SET_KEY = 'bigspenders';
+const SORTED_SET_KEY = 'top-sellers';
 
 async function createPurchaseAmount(artist_name, amount_paid_usd) {
   await redis.zIncrBy(SORTED_SET_KEY, amount_paid_usd, artist_name);
