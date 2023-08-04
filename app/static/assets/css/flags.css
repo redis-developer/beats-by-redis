@@ -997,7 +997,7 @@
 
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   .flag-icon {
-    background: transparent url('/img/_sprite-country-flags-20170630@2x.png')
+    background: transparent url('../images/country-flags.png')
       no-repeat 0 0;
     background-size: 225px 170px;
     display: none;
