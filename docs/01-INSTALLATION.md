@@ -1,68 +1,59 @@
-# Installation Instructions #
+# Installation Instructions
 
 Gotta get some Redis and get the code before we can do anything, right? So let's do that:
 
 1. Clone the repo:
+
 ```bash
-git clone https://github.com/redis-developer/banking-on-redis.git
+git clone https://github.com/redis-developer/beats-by-redis.git
 ```
 
 2. Enter the repository:
-```bash
-cd banking-on-redis
-```
-
-Once installed you have some options on how you want to run this. We recommend using Docker but if you don't have Docker or don't like it for some reason, I've included some instructions on how to do it without Docker.
-
-
-## Running Locally With Docker (i.e. Easy Mode) ##
-
-This application can be run locally with Docker. A Redis instance and the Node.js server will run concurrently. Note, if you have an instance of Redis running already *and* it's running on port `6379`, you might want to stop it first or this will fail.
-
-To start up Redis and the sample application, just start the Docker image in the traditional way:
 
 ```bash
-docker-compose up --build
+cd beats-by-redis
 ```
 
-Redis is now listening on port `6379`. Your code will talk to Redis on this port. Nothing for you to do here.
+Once installed you have some options on how you want to run this. We recommend using a [free Redis Cloud database](https://redis.com/try-free) for Redis and Docker for the client app.
 
-RedisInsight is listening on port `8001`. To use it, open a browser and point it at [localhost:8001](http://localhost:8001).
+## Using A Free Redis Cloud Database
 
-And, the application itself is listening on port `8080`. Use a browser to access this at [localhost:8080](http://localhost:8080).
+Visit [redis.com/try-free](https://redis.com/try-free) and sign up for a free account. Once you've done that, create a database. You'll need the connection information for the database you create. Below is a gif showing how to get your connection string:
+
+![Redis Cloud connection string](redis-cloud-connection-string.gif)
+
+With your connection string, you'll need to create a `.env` file. The `.env` file is used by the Node.js application to get the connection information for Redis. You can copy `.env.example` to `.env` and start from there. The `.env` file should look like this:
+
+```bash
+REDIS_HOST=<username>:<password>@<host>
+REDIS_PORT=<port>
+AUTH_SECRET=<your-secret>
+SESSION_SECRET=<your-secret>
+```
+
+So if your connection string is `redis://default:kKLjflk3k24kmnNLLKDJj3k@redis-12345.c12.us-east-1-2.ec2.cloud.redislabs.com:12345`, and you want to use `p1zz4` as your secret, your `.env` file would look like this:
+
+```bash
+REDIS_HOST=redis://default:kKLjflk3k24kmnNLLKDJj3k@redis-12345.c12.us-east-1-2.ec2.cloud.redislabs.com
+REDIS_PORT=12345
+AUTH_SECRET=p1zz4
+SESSION_SECRET=p1zz4
+```
+
+You will also want to download and install [RedisInsight](https://redis.com/redisinsight/) for working with and visualizing data.
+
+## Running Locally With Docker (i.e. Easy Mode)
+
+To start up the sample application, just start the Docker image in the traditional way:
+
+```bash
+docker-compose up -d
+```
 
 The Node.js server—that thing that is listening on port `8080` is using `nodemon`. So, you can make changes to the code while all this glorious stuff is running and the server will automatically reload.
 
+## Confirming the Installation
 
-## Running Locally Without Docker (i.e. Hard Mode) ##
+Once you have successfully installed the application, you should be able to access it at [localhost:8080](http://localhost:8080). You should see the following:
 
-This method has you downloading and installing a version of Redis on your machine. You'll start up Redis then start up the _Banking on Redis_ application.
-
-There are a [few options](https://redis.io/docs/stack/get-started/install/) for installing Redis Stack locally. Pick one that makes sense for you and follow the instructions. We can help if you get stuck.
-
-Depending on how you install Redis Stack, you might also need to install RedisInsight. [Instuctions for that](https://redis.com/redisinsight/) are online as well. Again, we can help if you get stuck.
-
-To get the app running, you'll need to have a recent version of Node.js installed. We'll assume you are able to download and install that. Hopefully, you've got it already!
-
-To start the application, do the following:
-
-```bash
-cd app
-npm run dev:watch
-```
-
-You can do this later if you'd prefer.
-
-
-## Confirming the Installation ##
-
-You've got it all installed. Great! Let's do a quick test to ensure that Redis is running locally. Go to RedisInsight, select the workbench option or the CLI option, and then send a `PING` command. You should get a `PONG` back.
-
-Like this:
-
-```bash
-127.0.0.1:6379> PING
-PONG
-```
-
-And, as always, if you have any questions or need help, we're here to serve.
+![Beats By Redis login screen](login-screen.png)
