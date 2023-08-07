@@ -1,69 +1,59 @@
-# Using RedisJSON #
+# Using JSON #
 
-[RedisJSON](https://redis.io/docs/stack/json/) is a module. Modules are plugins to Redis that extend it with new data structures and new commands. Anyone can [write a module](https://redis.io/docs/reference/modules/) if they are handy with a systems-level programing language like C or Rust.
+Redis Stack supports the [JSON](https://redis.io/docs/stack/json/) data type. This provides a great way to store more structured and nested data in Redis. In addition, Redis Stack provides a [Search and Query engine](https://redis.io/docs/interact/search-and-query/) that enables indexing, full-text search, vector similarity search, and other aggregate queries on JSON documents and Hashes.
 
-RedisJSON, as you might have guessed based on the name, adds a JSON document data structure and [commands](https://redis.io/commands/?group=json) to manipulate those documents.
-
-Let's try it out from RedisInsight first. Then we can take a look at changing our API to write out to JSON instead.
+There are a few notable [JSON commands](https://redis.io/commands/?group=json) supported in Redis, let's try them out using the Beats-By-Redis data.
 
 ## Getting and Setting JSON ##
 
-Let's store a simple transaction in RedisJSON using the [JSON.SET](https://redis.io/commands/json.set/) command:
+Let's store a purchase in JSON using the [JSON.SET](https://redis.io/commands/json.set/) command:
 
 ```bash
-127.0.0.1:6379> JSON.SET exercise:transaction:5558675309:123456 $ '{ "payee": "Justin Castilla", "amount": 123.45, "cleared": false }'
+127.0.0.1:6379> JSON.SET "purchase:Chastity Belt.1691424127.9802382" $ '{"utc_date":1691424127,"artist_name":"Chastity Belt","item_type":"a","item_description":"The Process (Jenn Champion Remix)","album_title":"The Process (Jenn Champion Remix)","slug_type":"a","track_album_slug_text":"null","currency":"USD","amount_paid":1,"item_price":1,"amount_paid_usd":1,"country":"United States","art_id":"589692562","releases":"null","package_image_id":"null","url":"//chastity-belt.bandcamp.com/album/the-process-jenn-champion-remix","country_code":"us","amount_paid_fmt":"$1","art_url":"https://f4.bcbits.com/img/a0589692562_7.jpg","utc_date_raw":1691424127.9802382}'
 OK
 ```
 
-Note that the JSON.SET command takes a JSON string. Since JSON strings are full of double quotes, I always use single quotes when providing this string. However, you *can* use double quotes if you want, you just need to escape the inner quotes. Like this:
-
-```bash
-127.0.0.1:6379> JSON.SET exercise:transaction:5558675309:123456 $ "{ \"payee\": \"Justin Castilla\", \"amount\": 123.45, \"cleared\": false }"
-OK
-```
-
-Probably not worth it.
+Note that the JSON.SET command takes a JSON string. Since JSON strings are full of double quotes, it is much easier to use single quotes when providing this string rather than escaping all of the quotes within the JSON itself. Looking at the key, `"purchase:Chastity Belt.1691424127.9802382"`, note that we use double quotes here because there is a space in the key. Spaces are totally fine as Redis keys, but make sure you use quotes to surround the key.
 
 Now, let's get our JSON string using [JSON.GET](https://redis.io/commands/json.get/):
 
 ```bash
-127.0.0.1:6379> JSON.GET exercise:transaction:5558675309:123456
-"{\"payee\":\"Justin Castilla\",\"amount\":123.45,\"cleared\":false}"
+127.0.0.1:6379> JSON.GET "purchase:Chastity Belt.1691424127.9802382"
+"{\"utc_date\":1691424127,\"artist_name\":\"Chastity Belt\",\"item_type\":\"a\",\"item_description\":\"The Process (Jenn Champion Remix)\",\"album_title\":\"The Process (Jenn Champion Remix)\",\"slug_type\":\"a\",\"track_album_slug_text\":\"null\",\"currency\":\"USD\",\"amount_paid\":1,\"item_price\":1,\"amount_paid_usd\":1,\"country\":\"United States\",\"art_id\":\"589692562\",\"releases\":\"null\",\"package_image_id\":\"null\",\"url\":\"//chastity-belt.bandcamp.com/album/the-process-jenn-champion-remix\",\"country_code\":\"us\",\"amount_paid_fmt\":\"$1\",\"art_url\":\"https://f4.bcbits.com/img/a0589692562_7.jpg\",\"utc_date_raw\":1691424127.9802382}"
 ```
 
 We can get individual properties from our JSON document too. Just provide the path to the property you want to get in [JSONPath](https://redis.io/docs/stack/json/path/) syntax:
 
 ```bash
-127.0.0.1:6379> JSON.GET exercise:transaction:5558675309:123456 $.payee
-"[\"Justin Castilla\"]"
+127.0.0.1:6379> JSON.GET "purchase:Chastity Belt.1691424127.9802382" $.artist_name
+"[\"Chastity Belt\"]"
 ```
-
-Note that a JSON array is returned. This can seem annoying, but since a JSONPath query might return multiple items, RedisJSON needs to return arrays. For example, let's say we have a JSON document in Redis that looks like this:
+Note that a JSON array is returned. This can seem annoying, but since a JSONPath query might return multiple items, Redis needs to return arrays. For example, let's say we have a JSON document in Redis that looks like this:
 
 ```json
 {
-  "transactions": [
-    { "payee": "Justin Castilla", "amount": 123.45, "cleared": true },
-    { "payee": "Guy Royse", "amount": 67.89, "cleared": true },
-    { "payee": "Paul Ford", "amount": 9.99, "cleared": false }
+  "purchases": [
+    { "artist_name": "Justin Castilla", "utc_date": 1691424127 },
+    { "artist_name": "Guy Royse", "utc_date": 1691425127  },
+    { "artist_name": "Will Johnston", "utc_date": 1691524127  }
   ]
 }
 ```
 
-If we queried it with a JSONPath of `$..payee`—which would return any property in the entire JSON document with the name of `userName`—we would get back an array of values.
+If we queried it with a JSONPath of `$..artist_name`—which would return any property in the entire JSON document with the name of `artist_name`—we would get back an array of values.
 
 Let's go ahead and try this out. Set the following JSON:
 
 ```bash
-127.0.0.1:6379> JSON.SET exercise:transactions:5558675309 $ '{ "transactions": [ { "payee": "Justin Castilla", "amount": 123.45, "cleared": true }, { "payee": "Guy Royse", "amount": 67.89, "cleared": true}, { "payee": "Paul Ford", "amount": 9.99, "cleared": false } ] }'
+127.0.0.1:6379> JSON.SET purchases:test:1234 $ '{"purchases":[{"artist_name":"Justin Castilla","utc_date":1691424127},{"artist_name":"Guy Royse","utc_date":1691425127},{"artist_name":"Will Johnston","utc_date":1691524127}]}'
 OK
 ```
 
 And let's query it with the aforementioned query:
 
 ```bash
-127.0.0.1:6379> JSON.GET exercise:transactions:5558675309 $..payee
-"[\"Justin Castilla\",\"Guy Royse\",\"Paul Ford\"]"
+127.0.0.1:6379> JSON.GET purchases:test:1234 $..artist_name
+"[\"Justin Castilla\",\"Guy Royse\",\"Will Johnston\"]"
 ```
 
 That array is kinda handy now.
@@ -71,83 +61,19 @@ That array is kinda handy now.
 Of course, you can query arrays and objects as well:
 
 ```bash
-127.0.0.1:6379> JSON.GET exercise:transactions:5558675309 $.transactions
-"[[{\"payee\":\"Justin Castilla\",\"amount\":123.45,\"cleared\":true},{\"payee\":\"Guy Royse\",\"amount\":67.89,\"cleared\":true},{\"payee\":\"Paul Ford\",\"amount\":9.99,\"cleared\":false}]]"
-127.0.0.1:6379> JSON.GET exercise:transactions:5558675309 $.transactions[0]
-"[{\"payee\":\"Justin Castilla\",\"amount\":123.45,\"cleared\":true}]"
+127.0.0.1:6379> JSON.GET purchases:test:1234 $.purchases
+"[[{\"artist_name\":\"Justin Castilla\",\"utc_date\":1691424127},{\"artist_name\":\"Guy Royse\",\"utc_date\":1691425127},{\"artist_name\":\"Will Johnston\",\"utc_date\":1691524127}]]"
+127.0.0.1:6379> JSON.GET purchases:test:1234 $.purchases[0]
+"[{\"artist_name\":\"Justin Castilla\",\"utc_date\":1691424127}]"
 ```
 
 You can also get multiple properties by providing multiple paths:
 
 ```bash
-127.0.0.1:6379> JSON.GET exercise:transactions:5558675309 $..payee $..amount
-"{\"$..payee\":[\"Justin Castilla\",\"Guy Royse\",\"Paul Ford\"],\"$..amount\":[123.45,67.89,9.99]}"
+127.0.0.1:6379> JSON.GET purchases:test:1234 $..artist_name $..utc_date
+"{\"$..artist_name\":[\"Justin Castilla\",\"Guy Royse\",\"Will Johnston\"],\"$..utc_date\":[1691424127,1691425127,1691524127]}"
 ```
 
 Note that when you provide multiple paths, you get back an object with each of your queries as property names. The values in those properties are the arrays from that query.
 
-In addition to getting properties on a document, we can also set properties. Just provide the path to the property you want to set. If it doesn't exist, it will be created. If it does exist, it will be changed:
-
-```bash
-127.0.0.1:6379> JSON.SET exercise:transaction:5558675309:123456 $.memo '"Justin needs a new pair of hiking boots"'
-OK
-127.0.0.1:6379> JSON.SET exercise:transaction:5558675309:123456 $.transactionId '"123456"'
-OK
-127.0.0.1:6379> JSON.GET exercise:transaction:5558675309:123456
-"{\"payee\":\"Justin Castilla\",\"amount\":123.45,\"cleared\":false,\"memo\":\"Justin needs a new pair of hiking boots\",\"transactionId\":\"5034\"}"
-```
-
-Note the odd syntax here. The values we are setting are JSON. For a string to be valid JSON, it needs to be in quotes, double quotes specifically. If we set a string in Redis, we need to put it in quotes. So, we wrap it in single quotes. Strings in strings. Yo dawg.
-
-You can also set paths that match more than one property in a document. If you do, it will update everything that matches. Let's update all of our `payee` properties to a worthy human:
-
-```bash
-127.0.0.1:6379> JSON.SET exercise:transactions:5558675309 $..payee '"Alfred E. Neuman"'
-OK
-127.0.0.1:6379> JSON.GET exercise:transactions:5558675309
-"{\"transactions\":[{\"payee\":\"Alfred E. Neuman\",\"amount\":123.45,\"cleared\":true},{\"payee\":\"Alfred E. Neuman\",\"amount\":67.89,\"cleared\":true},{\"payee\":\"Alfred E. Neuman\",\"amount\":9.99,\"cleared\":false}]}"
-```
-
-We'll cover one last command here: [JSON.DEL](https://redis.io/commands/json.del/). As you might imagine, this deletes all or part of a JSON document based on a JSONPath. Let's delete a transaction from `exercise:transactions:5558675309`:
-
-```bash
-127.0.0.1:6379> JSON.DEL exercise:transactions:5558675309 $.transactions[0]
-(integer) 1
-127.0.0.1:6379> JSON.GET exercise:transactions:5558675309
-"{\"transactions\":[{\"payee\":\"Alfred E. Neuman\",\"amount\":67.89,\"cleared\":true},{\"payee\":\"Alfred E. Neuman\",\"amount\":9.99,\"cleared\":false}]}"
-```
-
-Our first user transaction, paid to Alfred E. Neuman for $123.45, has been removed.
-
-If a JSONPath matches multiple properties in the document, everything matching will be removed. Let's remove the `cleared` property for all of our exercise:transactions:
-
-```bash
-127.0.0.1:6379> JSON.DEL exercise:transactions:5558675309 $.transactions[*].cleared
-(integer) 2
-127.0.0.1:6379> JSON.GET exercise:transactions:5558675309
-"{\"transactions\":[{\"payee\":\"Alfred E. Neuman\",\"amount\":67.89},{\"payee\":\"Alfred E. Neuman\",\"amount\":9.99}]}"
-```
-
-If we delete all of the properties in the document, we have just an empty document:
-
-```bash
-127.0.0.1:6379> JSON.DEL exercise:transactions:5558675309 $.transactions
-(integer) 1
-127.0.0.1:6379> JSON.GET exercise:transactions:5558675309
-"{}"
-```
-
-If we want to remove the JSON document itself, we need to delete the root. Or just call delete without a path:
-
-```bash
-127.0.0.1:6379> JSON.DEL exercise:transactions:5558675309 $
-(integer) 1
-127.0.0.1:6379> JSON.GET exercise:transactions:5558675309
-(nil)
-127.0.0.1:6379> JSON.DEL exercise:transaction:5558675309:123456
-(integer) 1
-127.0.0.1:6379> JSON.GET exercise:transaction:5558675309:123456
-(nil)
-```
-
-That's plenty to get you started with RedisJSON. There are [lots of additional commands](https://redis.io/commands/?group=json) to manipulate JSON documents in Redis. I encourage you to play around with them.
+That's plenty to get you started with JSON. There are [lots of additional commands](https://redis.io/commands/?group=json) to manipulate JSON documents in Redis. I encourage you to play around with them.
