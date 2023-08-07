@@ -124,41 +124,41 @@ new Vue({
           console.log('Error! Could not reach the API. ' + error);
         });
 
-      axios
-        .get('/purchase/history')
-        .then(function (response) {
-          vm.areaChart.updateSeries([
-            {
-              name: 'Purchases',
-              data: response.data.map((entry) => {
-                return {
-                  x: entry.timestamp,
-                  y: entry.value,
-                };
-              }),
-            },
-          ]);
-        })
-        .catch(function (error) {
-          console.log('Error! Could not reach the API. ' + error);
-        });
+    //   axios
+    //     .get('/purchase/history')
+    //     .then(function (response) {
+    //       vm.areaChart.updateSeries([
+    //         {
+    //           name: 'Purchases',
+    //           data: response.data.map((entry) => {
+    //             return {
+    //               x: entry.timestamp,
+    //               y: entry.value,
+    //             };
+    //           }),
+    //         },
+    //       ]);
+    //     })
+    //     .catch(function (error) {
+    //       console.log('Error! Could not reach the API. ' + error);
+    //     });
 
-      axios
-        .get('/purchase/top-sellers')
-        .then(function (response) {
-          vm.pieOptions.series = response.data.series;
-          vm.pieOptions.labels = response.data.labels;
+    //   axios
+    //     .get('/purchase/top-sellers')
+    //     .then(function (response) {
+    //       vm.pieOptions.series = response.data.series;
+    //       vm.pieOptions.labels = response.data.labels;
 
-          vm.pieChart.destroy();
-          vm.pieChart = new ApexCharts(
-            document.querySelector('#chart'),
-            vm.pieOptions,
-          );
-          vm.pieChart.render();
-        })
-        .catch(function (error) {
-          console.log('Error! Could not reach the API. ' + error);
-        });
+    //       vm.pieChart.destroy();
+    //       vm.pieChart = new ApexCharts(
+    //         document.querySelector('#chart'),
+    //         vm.pieOptions,
+    //       );
+    //       vm.pieChart.render();
+    //     })
+    //     .catch(function (error) {
+    //       console.log('Error! Could not reach the API. ' + error);
+    //     });
     },
     connect: function () {
       var vm = this;
@@ -184,51 +184,51 @@ new Vue({
               vm.items = items;
             }
 
-            if (purchaseHistory) {
-              vm.areaChart.updateSeries([
-                {
-                  name: 'value',
-                  data: purchaseHistory.map((entry) => {
-                    return {
-                      x: entry.timestamp,
-                      y: entry.value,
-                    };
-                  }),
-                },
-              ]);
-            }
+            // if (purchaseHistory) {
+            //   vm.areaChart.updateSeries([
+            //     {
+            //       name: 'value',
+            //       data: purchaseHistory.map((entry) => {
+            //         return {
+            //           x: entry.timestamp,
+            //           y: entry.value,
+            //         };
+            //       }),
+            //     },
+            //   ]);
+            // }
 
-            if (topSellers) {
-              vm.pieOptions.series = topSellers.series;
-              vm.pieOptions.labels = topSellers.labels;
+            // if (topSellers) {
+            //   vm.pieOptions.series = topSellers.series;
+            //   vm.pieOptions.labels = topSellers.labels;
 
-              vm.pieChart.destroy();
-              vm.pieChart = new ApexCharts(
-                document.querySelector('#chart'),
-                vm.pieOptions,
-              );
-              vm.pieChart.render();
-            }
+            //   vm.pieChart.destroy();
+            //   vm.pieChart = new ApexCharts(
+            //     document.querySelector('#chart'),
+            //     vm.pieOptions,
+            //   );
+            //   vm.pieChart.render();
+            // }
           };
         };
       });
     },
-    getAnswer: function () {
-      var searchTerm = this.question;
-      if (this.question.length > 0) {
-        searchTerm = searchTerm.trim() + '*';
-      }
+    // getAnswer: function () {
+    //   var searchTerm = this.question;
+    //   if (this.question.length > 0) {
+    //     searchTerm = searchTerm.trim() + '*';
+    //   }
 
-      var searchUrl = '/purchase/search?term=' + searchTerm;
-      var vm = this;
-      axios
-        .get(searchUrl)
-        .then(function (response) {
-          vm.searchitems = response.data;
-        })
-        .catch(function (error) {
-          console.log('Error! Could not reach the API. ' + error);
-        });
-    },
+    //   var searchUrl = '/purchase/search?term=' + searchTerm;
+    //   var vm = this;
+    //   axios
+    //     .get(searchUrl)
+    //     .then(function (response) {
+    //       vm.searchitems = response.data;
+    //     })
+    //     .catch(function (error) {
+    //       console.log('Error! Could not reach the API. ' + error);
+    //     });
+    // },
   },
 });
