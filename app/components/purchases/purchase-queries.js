@@ -22,23 +22,6 @@ async function topSellers() {
   return { series, labels };
 }
 
-async function search(term) {
-  if (term.length > 3) {
-    return purchaseRepository
-      .search()
-      .where('artist_name')
-      .matches(term)
-      .or('album_title')
-      .matches(term)
-      .or('item_description')
-      .matches(term)
-      .or('country')
-      .equals(term)
-      .sortBy('utc_date_raw', 'DESC')
-      .return.page(0, 10);
-  }
-}
-
 async function recentPurchases() {
   return purchaseRepository
     .search()
@@ -46,4 +29,4 @@ async function recentPurchases() {
     .return.page(0, 10);
 }
 
-export { purchaseHistory, topSellers, search, recentPurchases };
+export { purchaseHistory, topSellers, recentPurchases };

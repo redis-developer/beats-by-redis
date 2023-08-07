@@ -18,11 +18,6 @@ router.get('/top-sellers', async (req, res) => {
   res.send(await topSellers());
 });
 
-router.get('/search', async (req, res) => {
-  const term = req.query.term;
-  res.send(await search(term));
-});
-
 /* return ten most recent transactions */
 router.get('/purchases', async (req, res) => {
     res.send(await recentPurchases());
