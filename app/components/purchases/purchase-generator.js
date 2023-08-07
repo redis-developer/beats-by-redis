@@ -2,12 +2,6 @@ import { redis } from '../../om/client.js';
 
 const SORTED_SET_KEY = 'top-sellers';
 
-async function createPurchaseAmount(artist_name, amount_paid_usd) {
-  await redis.zIncrBy(SORTED_SET_KEY, amount_paid_usd, artist_name);
-
-  return amount_paid_usd;
-}
-
 async function createAlbumPurchase(purchase) {
   /* Grab an artist from the stream. keep track of the entity id */
   purchase.artist_name = purchase.artist_name.replaceAll(':', ';');
@@ -23,7 +17,6 @@ async function createAlbumPurchase(purchase) {
   const artistKey = `purchase:${purchase.artist_name}.${purchase.utc_date_raw}`;
   const purchaseJSON = await redis.json.set(artistKey, '$', purchase);
 
-  await createPurchaseAmount(purchase.artist_name, purchase.amount_paid_usd);
   return purchaseJSON;
 }
 

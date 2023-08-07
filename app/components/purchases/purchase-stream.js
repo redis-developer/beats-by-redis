@@ -110,14 +110,12 @@ async function listenForPurchases(sockets) {
 async function initialize(sockets) {
   // Every minute we will update the time series and top sellers
   cron.schedule('*/60 * * * * *', async () => {
-    const topSellersData = await topSellers();
     const purchaseHistoryData = await purchaseHistory();
 
     // send to UI
     sockets.forEach((socket) => {
       socket.send(
         JSON.stringify({
-          topSellers: topSellersData,
           purchaseHistory: purchaseHistoryData,
         }),
       );

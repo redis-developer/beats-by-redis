@@ -9,19 +9,6 @@ async function purchaseHistory() {
   return redis.ts.range(SALES_TS, Date.now() - ONE_HOUR, Date.now());
 }
 
-async function topSellers() {
-  const range = await redis.zRangeWithScores(SORTED_SET_KEY, -5, -1);
-  let series = [];
-  let labels = [];
-
-  range.slice(0, 5).forEach((spender) => {
-    series.push(parseFloat(spender.score.toFixed(2)));
-    labels.push(spender.value);
-  });
-
-  return { series, labels };
-}
-
 async function recentPurchases() {
   return purchaseRepository
     .search()
@@ -29,4 +16,4 @@ async function recentPurchases() {
     .return.page(0, 10);
 }
 
-export { purchaseHistory, topSellers, recentPurchases };
+export { purchaseHistory, recentPurchases };
