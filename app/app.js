@@ -64,12 +64,6 @@ app.get('/api/config/ws', (req, res) => {
 });
 
 async function setupData() {
-  const haveTs = await redis.EXISTS('sales_ts');
-
-  if (!haveTs) {
-    await redis.ts.create('sales_ts', { DUPLICATE_POLICY: 'FIRST' });
-  }
-
   purchase.repositories.purchase.createIndex();
   account.repositories.account.createIndex();
   account.repositories.user.createIndex();

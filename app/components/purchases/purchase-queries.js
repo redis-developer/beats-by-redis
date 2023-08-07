@@ -5,10 +5,6 @@ const ONE_HOUR = 1000 * 60 * 60;
 const SALES_TS = 'sales_ts';
 const SORTED_SET_KEY = 'top-sellers';
 
-async function purchaseHistory() {
-  return redis.ts.range(SALES_TS, Date.now() - ONE_HOUR, Date.now());
-}
-
 async function recentPurchases() {
   return purchaseRepository
     .search()
@@ -16,4 +12,4 @@ async function recentPurchases() {
     .return.page(0, 10);
 }
 
-export { purchaseHistory, recentPurchases };
+export { recentPurchases };

@@ -29,11 +29,6 @@ async function streamPurchases() {
       return acc.concat(e.items);
     }, []);
 
-    // adds most recent number of purchases into ts
-    await redis.ts.add(SALES_TS, '*', purchases.length, {
-      DUPLICATE_POLICY: 'FIRST',
-    });
-
     // adds purchases to stream
     let lastSale = 0;
     for (let sale of events) {
@@ -108,20 +103,6 @@ async function listenForPurchases(sockets) {
 }
 
 async function initialize(sockets) {
-  // Every minute we will update the time series and top sellers
-  cron.schedule('*/60 * * * * *', async () => {
-    const purchaseHistoryData = await purchaseHistory();
-
-    // send to UI
-    sockets.forEach((socket) => {
-      socket.send(
-        JSON.stringify({
-          purchaseHistory: purchaseHistoryData,
-        }),
-      );
-    });
-  });
-
   // Read in new sales events from Bandcamp and stream them into the app
   streamPurchases();
 
