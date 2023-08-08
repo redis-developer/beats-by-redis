@@ -42,12 +42,14 @@ AUTH_SECRET=p1zz4
 SESSION_SECRET=p1zz4
 ```
 
+NOTE: The `AUTH_SECRET` and `SESSION_SECRET` are values used for signing cookies and encrypting tokens. You can make these whatever you want, but they should be random.
+
 ## Running Locally With Docker (i.e. Easy Mode)
 
 To start up the sample application, just start the Docker image in the traditional way:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 The Node.js server—that thing that is listening on port `8080` is using `nodemon`. So, you can make changes to the code while all this glorious stuff is running and the server will automatically reload.
@@ -57,6 +59,8 @@ The Node.js server—that thing that is listening on port `8080` is using `nodem
 Once you have successfully installed the application, you should be able to access it at [localhost:8080](http://localhost:8080). You should see the following:
 
 ![Beats By Redis login screen](login-screen.png)
+
+In order to get to the dashboard, you will need to click the "Sign up here" link and register an account. This is all local to your Redis database, so you can use whatever you want for your username and password. Just make sure to remember it. Registering will automatically log you in as well.
 
 ## RedisInsight Tutorial
 

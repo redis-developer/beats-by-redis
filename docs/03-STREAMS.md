@@ -1,6 +1,4 @@
-# Using Streams
-
-Note, this step and all the following steps in the tutorial assume you have followed the instructions in the [Setup](https://github.com/redis-developer/beats-by-redis/blob/main/docs/01-SETUP.md) instructions and have the application running locally.
+# Using Redis Streams For Purchase Events
 
 When you first start Beats By Redis with an empty database, new purchases will begin streaming in immediately. You might wonder how this happens, so let's break it down.
 
@@ -40,7 +38,7 @@ What the command above does is add a new message (...) to the `purchases` stream
 
 ## Reading Events
 
-You read events from a stream with the [XREAD](https://redis.io/commands/xread/) command. XREAD actually does quiet a bit. In its simplest form, it returns all of the events _after_ a particular key. Let's get everything since the start of the stream. You will need to paste this into the CLI in RedisInsight, since the workbench will not allow you to run it:
+You read events from a stream with the [XREAD](https://redis.io/commands/xread/) command. XREAD actually does quite a bit. In its simplest form, it returns all of the events _after_ a particular key. Let's get everything since the start of the stream. You will need to paste this into the CLI in RedisInsight, since the workbench will not allow you to run it:
 
 ```bash
 XREAD STREAMS purchases 0-0
