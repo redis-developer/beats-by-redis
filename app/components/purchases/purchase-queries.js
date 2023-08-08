@@ -11,5 +11,10 @@ async function recentPurchases() {
     .sortBy('utc_date_raw', 'DESC')
     .return.page(0, 10);
 }
+async function purchaseHistory() { }
 
-export { recentPurchases };
+async function topSellers() { }
+
+async function search(term) { }
+
+export { recentPurchases, search, purchaseHistory, topSellers };
