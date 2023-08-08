@@ -1,12 +1,10 @@
-# Using Redis for Searching and Querying
-
-Note, this step in the tutorial assumes you have followed the instructions in the [Setup](https://github.com/redis-developer/beats-by-redis/blob/main/docs/01-SETUP.md) instructions and have the application running locally.
+# Using Redis for Searching and Querying Purchases
 
 Redis Stack adds [indexing and full-text search](https://redis.io/docs/stack/search/) to Redis. You can use it to make your Hashes and JSON documents fully searchable. Searching in Redis is a _really_ big topic and would probably be suitable as a tutorial all its own. We're just going to cover the basics here. You can check out the [full search query syntax](https://redis.io/docs/stack/search/reference/query_syntax/) and learn more about what you can do.
 
 In this section, we'll be using [FT.CREATE](https://redis.io/commands/ft.create/) to create an index, [FT.SEARCH](https://redis.io/commands/ft.search/) to search, and [FT.DROPINDEX](https://redis.io/commands/ft.dropindex/) to delete an index. We'll also use [FT.INFO](https://redis.io/commands/ft.info/) to get information about our index and [FT.\_LIST](https://redis.io/commands/ft._list/) to get a list of existing indices.
 
-## Creating Indices
+## Creating Indexes
 
 Let's create an index to use. Take a look at the following command. In fact, go ahead and run it:
 
@@ -49,7 +47,7 @@ Next, is an optional alias to use when we search with the index later. With Hash
 
 Third and lastly, we tell Redis the type of data that is stored at that location. Valid types are TEXT, TAG, NUMERIC, and GEO. We'll cover these more later when we search on them.
 
-## Removing Indices
+## Removing Indexes
 
 If for some reason we don't like our index, we can always remove it using FT.DROPINDEX. Go ahead and remove the index:
 
@@ -78,7 +76,7 @@ FT.CREATE purchases:index
     $.album_title AS album_title TEXT
 ```
 
-## Searching Indices
+## Searching Indexes
 
 We search our index using the FT.SEARCH command. The simplest of searches is a search for everything. Go ahead and try it out:
 
@@ -86,7 +84,7 @@ We search our index using the FT.SEARCH command. The simplest of searches is a s
 FT.SEARCH purchases:index *
 ```
 
-Redis returns a lot of data. The very first thing is the total number of items that matched our query: 7118 in my case. Yours will be difference based on how long you have been running the app. After that, you get the key name followed by the contents of that key. The contents for a Hash would be a series of field names followed by values. But for JSON, the "field name" is just `$` and then "value" is the JSON text.
+Redis returns a lot of data. The very first thing is the total number of items that matched our query: 7118 in my case. Yours will be different based on how long you have been running the app. After that, you get the key name followed by the contents of that key. The contents for a Hash would be a series of field names followed by values. But for JSON, the "field name" is just `$` and then "value" is the JSON text.
 
 You might have noticed that we only got 10 results back but we have more total results. The call to FT.SEARCH has a default limit of `10`. You can override this and paginate the results using the `LIMIT` option. Try just getting five results:
 

@@ -1,12 +1,10 @@
-# Using JSON #
-
-Note, this step and all the following steps in the tutorial assume you have followed the instructions in the [Setup](https://github.com/redis-developer/beats-by-redis/blob/main/docs/01-SETUP.md) instructions and have the application running locally.
+# Working with Purchase JSON Documents
 
 Redis Stack supports the [JSON](https://redis.io/docs/stack/json/) data type. This provides a great way to store more structured and nested data in Redis. In addition, Redis Stack provides a [Search and Query engine](https://redis.io/docs/interact/search-and-query/) that enables indexing, full-text search, vector similarity search, and other aggregate queries on JSON documents and Hashes.
 
 There are a few notable [JSON commands](https://redis.io/commands/?group=json) supported in Redis, let's try them out using the Beats By Redis data.
 
-## Getting and Setting JSON ##
+## Getting and Setting JSON
 
 Let's store a purchase in JSON using the [JSON.SET](https://redis.io/commands/json.set/) command:
 
@@ -27,15 +25,16 @@ We can get individual properties from our JSON document too. Just provide the pa
 ```redis JSON.GET artist_name
 JSON.GET "purchase:Chastity Belt.1691424127.9802382" $.artist_name
 ```
+
 Note that a JSON array is returned. This can seem annoying, but since a JSONPath query might return multiple items, Redis needs to return arrays. For example, let's say we have a JSON document in Redis that looks like this:
 
 ```json
 {
-  "purchases": [
-    { "artist_name": "Justin Castilla", "utc_date": 1691424127 },
-    { "artist_name": "Guy Royse", "utc_date": 1691425127  },
-    { "artist_name": "Will Johnston", "utc_date": 1691524127  }
-  ]
+    "purchases": [
+        { "artist_name": "Justin Castilla", "utc_date": 1691424127 },
+        { "artist_name": "Guy Royse", "utc_date": 1691425127 },
+        { "artist_name": "Will Johnston", "utc_date": 1691524127 }
+    ]
 }
 ```
 

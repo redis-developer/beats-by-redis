@@ -9,26 +9,34 @@
     "children": [
         {
             "type": "internal-link",
-            "id": "bbr-streams",
-            "label": "Streams",
+            "id": "bbr-overview",
+            "label": "Overview",
             "args": {
-                "path": "/02-STREAMS.md"
+                "path": "/02-OVERVIEW.md"
+            }
+        },
+        {
+            "type": "internal-link",
+            "id": "bbr-streams",
+            "label": "Step 1: Add Purchase Events to a Stream",
+            "args": {
+                "path": "/03-STREAMS.md"
             }
         },
         {
             "type": "internal-link",
             "id": "bbr-json",
-            "label": "JSON",
+            "label": "Step 2: Get Purchase JSON",
             "args": {
-                "path": "/03-JSON.md"
+                "path": "/04-JSON.md"
             }
         },
         {
             "type": "internal-link",
             "id": "bbr-query",
-            "label": "Query",
+            "label": "Step 3: Search for Purchases",
             "args": {
-                "path": "/04-QUERY.md"
+                "path": "/05-QUERY.md"
             }
         }
     ]
