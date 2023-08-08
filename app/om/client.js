@@ -1,7 +1,7 @@
 import { createClient } from 'redis';
 
 import { config } from '../config.js';
-const url = `redis://${config.redisHost}:${config.redisPort}`;
+const url = `${config.redisHost}:${config.redisPort}`;
 
 export const redis = createClient({ url });
 
