@@ -1,6 +1,6 @@
 # Beats By Redis Tutorial
 
-Welcome to the Beats By Redis. In this tutorial you will learn all about the inner workings of Beats By Redis, specifically how all of the data flows in and out of Redis. When building applications on top of Redis you will likely use a higher-level client (such as [node-redis](https://www.npmjs.com/package/redis)) rather than directly calling Redis commands. The Beats By Redis app is no different, it uses node-redis to execute commands against Redis.
+Welcome to the Beats By Redis tutorial. In this tutorial you will learn all about the inner workings of Beats By Redis, specifically how all of the data flows in and out of Redis. When building applications on top of Redis you will likely use a higher-level client (such as [node-redis](https://www.npmjs.com/package/redis)) rather than directly calling Redis commands. The Beats By Redis app is no different, it uses node-redis to execute commands against Redis.
 
 This tutorial takes things one level deeper and shows you the specific commands that node-redis uses. This is important because it will help you understand how Redis works and how to use Redis commands directly when you need to.
 
