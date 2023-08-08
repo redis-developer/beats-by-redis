@@ -1,6 +1,8 @@
 # Using Streams
 
-When you first start Beats-By-Redis with an empty database, new purchases will begin streaming in immediately. You might wonder how this happens, so let's break it down.
+Note, this step and all the following steps in the tutorial assume you have followed the instructions in the [Setup](https://github.com/redis-developer/beats-by-redis/blob/main/docs/01-SETUP.md) instructions and have the application running locally.
+
+When you first start Beats By Redis with an empty database, new purchases will begin streaming in immediately. You might wonder how this happens, so let's break it down.
 
 ## Adding Events to a Stream
 
@@ -30,18 +32,23 @@ for (let sale of events) {
 
 You will notice we are using the [XADD](https://redis.io/commands/xadd/) command to add purchases to a stream. Let's look at the command:
 
-```bash
-127.0.0.1:6379> XADD purchases MAXLEN ~ 100 * ...
+```redis XADD to stream
+XADD purchases MAXLEN ~ 100 * "utc_date" "1691449579.7615602" "artist_name" "Dead Lincoln" "item_type" "a" "item_description" "all through these hills" "album_title" "null" "slug_type" "a" "track_album_slug_text" "null" "currency" "USD" "amount_paid" "9" "item_price" "0" "amount_paid_usd" "9" "country" "United States" "art_id" "1574796345" "releases" "null" "package_image_id" "null" "url" "//deadlincoln.bandcamp.com/album/all-through-these-hills" "country_code" "us" "amount_paid_fmt" "$9" "amount_over_fmt" "$9" "art_url" "https://f4.bcbits.com/img/a1574796345_7.jpg" "utc_date_raw" "1691449579.7615602"
 ```
 
 What the command above does is add a new message (...) to the `purchases` stream, and also instruct Redis to keep the stream at a maximum of 100 entries. So Redis will automatically evict older entries. The `*` tells Redis to auto-generate an ID. The `...` is the message itself, which in our case is the purchase object. XADD will return the ID of the message that was just added.
 
 ## Reading Events
 
-You read events from a stream with the [XREAD](https://redis.io/commands/xread/) command. XREAD actually does quiet a bit. In its simplest form, it returns all of the events _after_ a particular key. Let's get everything since the start of the stream:
+You read events from a stream with the [XREAD](https://redis.io/commands/xread/) command. XREAD actually does quiet a bit. In its simplest form, it returns all of the events _after_ a particular key. Let's get everything since the start of the stream. You will need to paste this into the CLI in RedisInsight, since the workbench will not allow you to run it:
 
+```bash
+XREAD STREAMS purchases 0-0
 ```
-127.0.0.1:6379> XREAD STREAMS purchases 0-0
+
+The result should resemble the following:
+
+```bash
 1) 1) "purchases"
    2) 1) 1) "1691183512147-0"
          2) 1) "utc_date"

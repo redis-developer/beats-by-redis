@@ -1,0 +1,35 @@
+{
+    "type": "group",
+    "id": "beats-by-redis",
+    "label": "BEATS BY REDIS",
+    "args": {
+        "withBorder": true,
+        "initialIsOpen": false
+    },
+    "children": [
+        {
+            "type": "internal-link",
+            "id": "bbr-streams",
+            "label": "Streams",
+            "args": {
+                "path": "/02-STREAMS.md"
+            }
+        },
+        {
+            "type": "internal-link",
+            "id": "bbr-json",
+            "label": "JSON",
+            "args": {
+                "path": "/03-JSON.md"
+            }
+        },
+        {
+            "type": "internal-link",
+            "id": "bbr-query",
+            "label": "Query",
+            "args": {
+                "path": "/04-QUERY.md"
+            }
+        }
+    ]
+}

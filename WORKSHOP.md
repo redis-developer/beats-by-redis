@@ -1,9 +1,9 @@
-# Beats-By-Redis Live Workshop
+# Beats By Redis Live Workshop
 
 ## Overview
 
 1. Introductions
-2. Beats-By-Redis Overview
+2. Beats By Redis Overview
 3. Bandcamp Overview
 4. Redis Data Structures Used
   - Sorted Sets
@@ -27,7 +27,8 @@
     - Bandcamp rep dashboard
     - Regional dashboard
     - Different time series by month, quarter, year, etc.
-9. Q&A
+9. [RedisInsight Tutorial](./docs/01-SETUP.md)
+10. Q&A
 
 ## Live Coding
 
