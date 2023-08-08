@@ -63,14 +63,17 @@ Once you have successfully installed the application, you should be able to acce
 The rest of this tutorial will utilize the interactive tutorials feature of RedisInsight. Since you already have the app running, you will use RedisInsight to import the tutorial and then work with your data in real-time. Follow the steps below to get setup.
 
 1. If you haven't already, download and install [RedisInsight](https://redis.com/redisinsight/) for working with and visualizing data.
-1. Open RedisInsight and add a database. Use the same connection string you copied easlier in this tutorial, and follow the GIF below:
-![RedisInsight add database](redisinsight-add-database.gif)
-1. Once you have connected to your database, you should see some of the keys added by the Beats By Redis app. In order to import the tutorial, you will need to click the "Workbench" icon on the left side of the RedisInsight. Follow the GIF below if you are stuck:
-![RedisInsight Workbench](workbench-custom-tutorial.gif)
-1. In Workbench, click "Upload tutorial," copy/paste the following link, and then click "Submit"
-```
+2. Open RedisInsight and add a database. Use the same connection string you copied easlier in this tutorial, and follow the GIF below:
+   ![RedisInsight add database](redisinsight-add-database.gif)
+3. Once you have connected to your database, you should see some of the keys added by the Beats By Redis app. In order to import the tutorial, you will need to click the "Workbench" icon on the left side of the RedisInsight. Follow the GIF below if you are stuck:
+   ![RedisInsight Workbench](workbench-custom-tutorial.gif)
+4. In Workbench, click "Upload tutorial," copy/paste the following link, and then click "Submit"
 
 ```
-1. You should now see "BEATS BY REDIS" under "My Tutorials." Click on it to proceed.
+https://redis.com/wp-content/uploads/2023/08/beats-by-redisinsight.zip
+```
+
+5. Alternatively, you can upload the [./beats-by-redisinsight.zip](./beats-by-redisinsight.zip) file.
+6. You should now see "BEATS BY REDIS" under "My Tutorials." Click on it to proceed.
 
 The rest of this tutorial will be self-guided within RedisInsight. If you are having trouble, feel free to drop a question in our [Discord](https://discord.gg/redis) server.
