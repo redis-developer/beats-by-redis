@@ -27,7 +27,8 @@
     - Bandcamp rep dashboard
     - Regional dashboard
     - Different time series by month, quarter, year, etc.
-9. Q&A
+9. [RedisInsight Tutorial](./docs/01-SETUP.md)
+10. Q&A
 
 ## Live Coding
 

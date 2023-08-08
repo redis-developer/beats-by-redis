@@ -134,3 +134,7 @@ The top sellers endpoint retrieves the top 5 members of the sorted set `top-sell
 ### Purchases Websocket
 
 The Websocket connection streams the real time purchase information to each socket connection (client) as it is processed from Redis Streams. It also sends the purchase history and top sellers information once per minute. This allows the clients to get the most up-to-date purchase information, and routine updates to both charts.
+
+## RedisInsight Tutorial
+
+This repository provides a built-in, interactive RedisInsight tutorial. To get started follow the [setup instructions](./docs/01-SETUP.md)
