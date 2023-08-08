@@ -9,14 +9,6 @@
     "children": [
         {
             "type": "internal-link",
-            "id": "bbr-installation",
-            "label": "Installation",
-            "args": {
-                "path": "/01-INSTALLATION.md"
-            }
-        },
-        {
-            "type": "internal-link",
             "id": "bbr-streams",
             "label": "Streams",
             "args": {

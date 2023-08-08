@@ -1,8 +1,8 @@
 # Using Streams
 
-Note, this step and all the following steps in the tutorial assume you have followed the instructions in the `Installation` section and have the application running locally.
+Note, this step and all the following steps in the tutorial assume you have followed the instructions in the `Setup` section and have the application running locally.
 
-When you first start Beats-By-Redis with an empty database, new purchases will begin streaming in immediately. You might wonder how this happens, so let's break it down.
+When you first start Beats By Redis with an empty database, new purchases will begin streaming in immediately. You might wonder how this happens, so let's break it down.
 
 ## Adding Events to a Stream
 

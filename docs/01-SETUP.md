@@ -1,6 +1,8 @@
-# Installation Instructions
+# Setup Instructions
 
-Gotta get some Redis and get the code before we can do anything, right? So let's do that:
+This tutorial serves as an interactive guide to walk you through all of the features of Beats By Redis. It provides a custom RedisInsight tutorial that you can import directly into RedisInsight, where you can work with the data in real-time. The goal of this tutorial is to show you how to run the Beats By Redis app locally, and then use that data to learn about Redis Streams, JSON, Search, Sorted Sets, and Time Series.
+
+Before you begin, you will need to follow the steps below:
 
 1. Clone the repo:
 
@@ -40,8 +42,6 @@ AUTH_SECRET=p1zz4
 SESSION_SECRET=p1zz4
 ```
 
-You will also want to download and install [RedisInsight](https://redis.com/redisinsight/) for working with and visualizing data.
-
 ## Running Locally With Docker (i.e. Easy Mode)
 
 To start up the sample application, just start the Docker image in the traditional way:
@@ -57,3 +57,20 @@ The Node.js server—that thing that is listening on port `8080` is using `nodem
 Once you have successfully installed the application, you should be able to access it at [localhost:8080](http://localhost:8080). You should see the following:
 
 ![Beats By Redis login screen](login-screen.png)
+
+## RedisInsight Tutorial
+
+The rest of this tutorial will utilize the interactive tutorials feature of RedisInsight. Since you already have the app running, you will use RedisInsight to import the tutorial and then work with your data in real-time. Follow the steps below to get setup.
+
+1. If you haven't already, download and install [RedisInsight](https://redis.com/redisinsight/) for working with and visualizing data.
+1. Open RedisInsight and add a database. Use the same connection string you copied easlier in this tutorial, and follow the GIF below:
+![RedisInsight add database](redisinsight-add-database.gif)
+1. Once you have connected to your database, you should see some of the keys added by the Beats By Redis app. In order to import the tutorial, you will need to click the "Workbench" icon on the left side of the RedisInsight. Follow the GIF below if you are stuck:
+![RedisInsight Workbench](workbench-custom-tutorial.gif)
+1. In Workbench, click "Upload tutorial," copy/paste the following link, and then click "Submit"
+```
+
+```
+1. You should now see "BEATS BY REDIS" under "My Tutorials." Click on it to proceed.
+
+The rest of this tutorial will be self-guided within RedisInsight. If you are having trouble, feel free to drop a question in our [Discord](https://discord.gg/redis) server.

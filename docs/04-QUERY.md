@@ -1,6 +1,6 @@
 # Using Redis for Searching and Querying
 
-Note, this step in the tutorial assumes you have followed the instructions in the `Installation` section and have the application running locally.
+Note, this step in the tutorial assumes you have followed the instructions in the `Setup` section and have the application running locally.
 
 Redis Stack adds [indexing and full-text search](https://redis.io/docs/stack/search/) to Redis. You can use it to make your Hashes and JSON documents fully searchable. Searching in Redis is a _really_ big topic and would probably be suitable as a tutorial all its own. We're just going to cover the basics here. You can check out the [full search query syntax](https://redis.io/docs/stack/search/reference/query_syntax/) and learn more about what you can do.
 
@@ -31,7 +31,7 @@ This creates an index named `purchases:index`. If you look for this index in you
 FT._LIST
 ```
 
-Yep. There it is. There are also a few other indexes that were created by the Beats-By-Redis app.
+Yep. There it is. There are also a few other indexes that were created by the Beats By Redis app.
 
 Immediately after we specify the name of the index, we can provide the data structure that Redis should index. Redis can index both JSON documents and Hashes, specified by adding either `ON JSON` or `ON HASH`. If this is not specified, it defaults to `ON HASH`.
 

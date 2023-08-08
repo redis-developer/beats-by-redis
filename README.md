@@ -1,4 +1,4 @@
-# Beats-By-Redis
+# Beats By Redis
 
 ![Beats by Redis application screenshot](./docs/app-screenshot.png)
 
@@ -43,11 +43,11 @@ The purchase generator reads in sales and purchases from the Bandcamp Sales API 
 }
 ```
 
-In Beats-By-Redis, purchase information is saved as a JSON document in Redis. Each sale is recorded in a `sales_ts` timeseries.
+In Beats By Redis, purchase information is saved as a JSON document in Redis. Each sale is recorded in a `sales_ts` timeseries.
 
 ## Session Storage and Authentication
 
-Beats-By-Redis allows account registration and login in order to stream purchases and see top spenders. The account information is stored as a JSON document in Redis and uses an authentication token refresh token. The account JSON looks as follows:
+Beats By Redis allows account registration and login in order to stream purchases and see top spenders. The account information is stored as a JSON document in Redis and uses an authentication token refresh token. The account JSON looks as follows:
 
 ```json
 {
@@ -70,7 +70,7 @@ Session storage is also handled through Redis with the package [Connect Redis St
 
 ## Account API
 
-Beats-By-Redis provides an API for account registration and login. The API uses Redis JSON to store account information. Tokens are used for validating authentication, and are stored in a session cookie.
+Beats By Redis provides an API for account registration and login. The API uses Redis JSON to store account information. Tokens are used for validating authentication, and are stored in a session cookie.
 
 ### Login API
 
@@ -96,7 +96,7 @@ The Register API looks up a username in Redis. Assuming the user doesn't already
 
 ## Purchases API
 
-Beats-By-Redis provides an API for the timeseries chart to track sales history, a pie chart of the top five earners, a search endpoint to return specific purchases for artists or by country, and a list of the most recent purchases. A websocket connection provides the most purchases in real time, as well as top spenders and purchase history every minute.
+Beats By Redis provides an API for the timeseries chart to track sales history, a pie chart of the top five earners, a search endpoint to return specific purchases for artists or by country, and a list of the most recent purchases. A websocket connection provides the most purchases in real time, as well as top spenders and purchase history every minute.
 
 ### Search API
 

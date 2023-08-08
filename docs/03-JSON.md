@@ -1,10 +1,10 @@
 # Using JSON #
 
-Note, this step and all the following steps in the tutorial assume you have followed the instructions in the `Installation` section and have the application running locally.
+Note, this step and all the following steps in the tutorial assume you have followed the instructions in the `Setup` section and have the application running locally.
 
 Redis Stack supports the [JSON](https://redis.io/docs/stack/json/) data type. This provides a great way to store more structured and nested data in Redis. In addition, Redis Stack provides a [Search and Query engine](https://redis.io/docs/interact/search-and-query/) that enables indexing, full-text search, vector similarity search, and other aggregate queries on JSON documents and Hashes.
 
-There are a few notable [JSON commands](https://redis.io/commands/?group=json) supported in Redis, let's try them out using the Beats-By-Redis data.
+There are a few notable [JSON commands](https://redis.io/commands/?group=json) supported in Redis, let's try them out using the Beats By Redis data.
 
 ## Getting and Setting JSON ##
 

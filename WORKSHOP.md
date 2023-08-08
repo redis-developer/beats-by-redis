@@ -1,9 +1,9 @@
-# Beats-By-Redis Live Workshop
+# Beats By Redis Live Workshop
 
 ## Overview
 
 1. Introductions
-2. Beats-By-Redis Overview
+2. Beats By Redis Overview
 3. Bandcamp Overview
 4. Redis Data Structures Used
   - Sorted Sets
