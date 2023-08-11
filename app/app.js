@@ -17,7 +17,7 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
-// set up a basic web sockect server and a set to hold all the sockets
+// set up a basic web socket server and a set to hold all the sockets
 const wss = new WebSocketServer({ port: 80 });
 const sockets = new Set();
 

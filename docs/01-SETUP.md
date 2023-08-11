@@ -67,7 +67,7 @@ In order to get to the dashboard, you will need to click the "Sign up here" link
 The rest of this tutorial will utilize the interactive tutorials feature of RedisInsight. Since you already have the app running, you will use RedisInsight to import the tutorial and then work with your data in real-time. Follow the steps below to get setup.
 
 1. If you haven't already, download and install [RedisInsight](https://redis.com/redisinsight/) for working with and visualizing data.
-2. Open RedisInsight and add a database. Use the same connection string you copied easlier in this tutorial, and follow the GIF below:
+2. Open RedisInsight and add a database. Use the same connection string you copied earlier in this tutorial, and follow the GIF below:
    ![RedisInsight add database](redisinsight-add-database.gif)
 3. Once you have connected to your database, you should see some of the keys added by the Beats By Redis app. In order to import the tutorial, you will need to click the "Workbench" icon on the left side of the RedisInsight. Follow the GIF below if you are stuck:
    ![RedisInsight Workbench](workbench-custom-tutorial.gif)

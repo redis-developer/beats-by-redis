@@ -2,7 +2,7 @@
 
 ![Beats by Redis application screenshot](./docs/app-screenshot.png)
 
-This repository uses Redis core data structures, Streams, JSON, Search and TimeSeries to build a Node.js Express Redis Reactive application that uses the Bandamp Sales API to get recent sales and simulate streaming in real time. UI in Bootstrap/CSS/Vue.
+This repository uses Redis core data structures, Streams, JSON, Search and TimeSeries to build a Node.js Express Redis Reactive application that uses the Bandcamp Sales API to get recent sales and simulate streaming in real time. UI in Bootstrap/CSS/Vue.
 
 Features in this demo:
 
@@ -16,7 +16,7 @@ Features in this demo:
 
 ## Purchase Generator
 
-The purchase generator reads in sales and purchases from the Bandcamp Sales API and simulates streaming them into Redis in real time. The Bandcamp Sales API provides a list of sales, where each sale has it's own list of purchasers. Put another way, a "sale" corresponds to the shopping cart for a user, and each "purchase" is an item in the cart, either an album or a track. Here is an example of the purchase information:
+The purchase generator reads in sales and purchases from the Bandcamp Sales API and simulates streaming them into Redis in real time. The Bandcamp Sales API provides a list of sales, where each sale has its own list of purchasers. Put another way, a "sale" corresponds to the shopping cart for a user, and each "purchase" is an item in the cart, either an album or a track. Here is an example of the purchase information:
 
 ```json
 {
@@ -81,7 +81,7 @@ Beats By Redis provides an API for account registration and login. The API uses 
 | Parameters    | `{ username: string; password: string; }`   |
 | Return value  | Redirected to `/`                           |
 
-The Login API looks up a username in Redis, and gets a hashed password. It then validates the hashed password against the password provided by the user. If it's correct, it creates and stores an access token and refresh token in the session and redirects to the dashbaord.
+The Login API looks up a username in Redis, and gets a hashed password. It then validates the hashed password against the password provided by the user. If it's correct, it creates and stores an access token and refresh token in the session and redirects to the dashboard.
 
 ### Register API
 
@@ -92,7 +92,7 @@ The Login API looks up a username in Redis, and gets a hashed password. It then 
 | Parameters    | `{ username: string; password: string; }`   |
 | Return value  | Redirected to `/`                           |
 
-The Register API looks up a username in Redis. Assuming the user doesn't already exist, it creates a new user with a hashed password. Then it creates and stores an access token and refresh token in the session and redirects to the dashbaord.
+The Register API looks up a username in Redis. Assuming the user doesn't already exist, it creates a new user with a hashed password. Then it creates and stores an access token and refresh token in the session and redirects to the dashboard.
 
 ## Purchases API
 

@@ -16,7 +16,7 @@ async function createAlbumPurchase(purchase) {
   purchase.amount_paid = parseInt(purchase.amount_paid);
   purchase.item_price = parseInt(purchase.item_price);
   purchase.amount_paid_usd = parseInt(purchase.amount_paid_usd);
-  if (purchase.album_title == 'null') {
+  if (purchase.album_title === 'null') {
     purchase.album_title = purchase.item_description;
   }
 
