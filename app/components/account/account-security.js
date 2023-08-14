@@ -32,7 +32,7 @@ async function generateHash(password) {
   // Creating a unique salt for a particular user
   const salt = crypto.randomBytes(16).toString('hex');
 
-  // Hashing user's salt and passwordt
+  // Hashing user's salt and password
   const hash = crypto
     .pbkdf2Sync(password, salt, SALT_ROUNDS, HASH_LENGTH, PBKDF2_NAME)
     .toString(`hex`);

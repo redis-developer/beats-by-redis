@@ -86,7 +86,7 @@ FT.SEARCH purchases:index *
 
 Redis returns a lot of data. The very first thing is the total number of items that matched our query: 7118 in my case. Yours will be different based on how long you have been running the app. After that, you get the key name followed by the contents of that key. The contents for a Hash would be a series of field names followed by values. But for JSON, the "field name" is just `$` and then "value" is the JSON text.
 
-You might have noticed that we only got 10 results back but we have more total results. The call to FT.SEARCH has a default limit of `10`. You can override this and paginate the results using the `LIMIT` option. Try just getting five results:
+You might have noticed that we only got 10 results back, but we have more total results. The call to FT.SEARCH has a default limit of `10`. You can override this and paginate the results using the `LIMIT` option. Try just getting five results:
 
 ```redis Limit to 5 purchases
 FT.SEARCH purchases:index * LIMIT 0 5

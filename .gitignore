@@ -110,3 +110,6 @@ dist
 # Redis AOF
 redisdata/
 data/dump.rdb
+
+# IntelliJ IDEA project files
+.idea/
